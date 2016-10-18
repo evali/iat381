@@ -67,6 +67,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         // Unregister the listener
         sensorManager.unregisterListener(this);
         super.onStop();
+
+        // Adding test comment on onStop() method
     }
 
     public class CustomDrawableView extends View {
