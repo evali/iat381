@@ -1,4 +1,21 @@
 <resources>
     <string name="app_name">iat381</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Setting</string>
+    <string-array name="pattern_array">
+        <item>Circular</item>
+        <item>Wavy</item>
+        <item>Sqaure</item>
+    </string-array>
+    <string-array name="graphic_array">
+        <item>Flowers</item>
+        <item>Butterflies</item>
+        <item>Cats</item>
+        <item>Apple</item>
+    </string-array>
+    <string-array name="theme_array">
+        <item>Dark</item>
+        <item>Bright</item>
+        <item>Colorful</item>
+    </string-array>
+
 </resources>

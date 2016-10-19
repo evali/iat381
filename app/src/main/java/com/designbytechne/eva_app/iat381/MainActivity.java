@@ -1,5 +1,6 @@
 package com.designbytechne.eva_app.iat381;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,6 +9,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +29,26 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+
+        Spinner patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        patternSpinner.setAdapter(adapter);
+
+        Spinner themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
+        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.theme_array, android.R.layout.simple_spinner_item);
+        themeSpinner.setAdapter(adapter2);
+
+        Spinner graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
+        ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_item);
+        graphicSpinner.setAdapter(adapter3);
+
+
+
     }
 
     @Override
@@ -44,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent intent= new Intent(this, Setting.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
