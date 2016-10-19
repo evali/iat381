@@ -21,6 +21,8 @@
         <activity android:name=".Setting"
             android:label="Setting">
         </activity>
+        <activity android:name=".Videos"
+            android:label="Vidoes"></activity>
     </application>
 
 </manifest>

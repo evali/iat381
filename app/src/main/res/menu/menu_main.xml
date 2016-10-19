@@ -7,4 +7,9 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/videos"
+        android:orderInCategory="200"
+        android:title="Videos"
+        app:showAsAction="never" />
 </menu>
