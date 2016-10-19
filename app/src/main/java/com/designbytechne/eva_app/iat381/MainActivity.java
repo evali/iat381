@@ -11,8 +11,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
+
+
+    ToggleButton musicToggleButton, moveToggleButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        musicToggleButton = (ToggleButton)findViewById(R.id.musicToggleButton);
+        moveToggleButton = (ToggleButton)findViewById(R.id.moveToggleButton);
 
         Spinner patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
