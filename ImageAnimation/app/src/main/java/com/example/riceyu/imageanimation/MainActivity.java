@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
@@ -13,13 +14,21 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.Display;
 import android.view.View;
 
 public class MainActivity extends Activity implements SensorEventListener {
     CustomDrawableView mCustomDrawableView = null;
     ShapeDrawable mDrawable = new ShapeDrawable();
+
+    // Position and Acceleration values for drawing the shapes
     public static int accelX;
     public static int accelY;
+    public int xMid, yMid;
+    private int screenWidth, screenHeight;
+    public int radius = 100;
+
+    public Paint p;
 
     private Sensor Accelerometer;
     private SensorManager sensorManager = null;
@@ -27,29 +36,41 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Get a reference to a SensorManager
 
+        // Get a reference to a SensorManager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
+        // Get width and height of screen
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        screenWidth = size.x;
+        screenHeight = size.y;
+
+        xMid = screenWidth/2;
+        yMid = screenHeight/2;
+
+        // Create new drawable View
         mCustomDrawableView = new CustomDrawableView(this);
         setContentView(mCustomDrawableView);
-        // setContentView(R.layout.main);
+
+        View view = this.getWindow().getDecorView();
+        view.setBackgroundColor(Color.BLACK);
     }
 
     // This method will update the UI on new sensor events
     public void onSensorChanged(SensorEvent sensorEvent) {
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            accelX = (int) Math.pow(sensorEvent.values[1], 2);
-            accelY = (int) Math.pow(sensorEvent.values[2], 2);
+            accelX = (int) Math.pow(sensorEvent.values[0], 3);
+            accelY = (int) Math.pow(sensorEvent.values[1], 3);
         }
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
 
         }
     }
 
-    // I've chosen to not implement this method
     public void onAccuracyChanged(Sensor arg0, int arg1) {
         // TODO Auto-generated method stub
     }
@@ -58,8 +79,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     protected void onResume() {
         super.onResume();
         // Register this class as a listener for the accelerometer sensor
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -67,8 +88,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         // Unregister the listener
         sensorManager.unregisterListener(this);
         super.onStop();
-
-        // Adding test comment on onStop() method
     }
 
     public class CustomDrawableView extends View {
@@ -83,11 +102,31 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
 
         protected void onDraw(Canvas canvas) {
-            RectF oval = new RectF(accelX, accelY, accelX + width, accelY + height); // set bounds of rectangle
-            Paint p = new Paint(); // set some paint options
-            p.setColor(Color.BLUE);
-            canvas.drawOval(oval, p);
+            RectF oval = new RectF(accelX, accelY, accelX + width, accelY + height ); // set bounds of rectangle
+            
+            // Create new paint object
+            p = new Paint();
+            p.setColor(Color.WHITE);
+
+            //canvas.drawOval(oval, p);
+            // canvas.drawCircle(screenWidth/2, accelY, 50+(accelY/4), p);
+            drawCircles(canvas, xMid, yMid, radius + accelY/2);
             invalidate();
+        }
+
+        protected void drawCircles(Canvas canvas, int xMid, int yMid, int radius){
+
+            if (radius <= 1) { return; }
+
+            // draw first circle
+            canvas.drawCircle(xMid, yMid - radius, radius, p);
+
+            //draw circle to the left
+            drawCircles(canvas, xMid-radius, yMid, radius/2);
+
+            //draw circle to the right
+            drawCircles(canvas, xMid+radius, yMid, radius/2);
+
         }
     }
 }
