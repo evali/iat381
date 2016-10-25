@@ -104,29 +104,38 @@ public class MainActivity extends Activity implements SensorEventListener {
         protected void onDraw(Canvas canvas) {
             RectF oval = new RectF(accelX, accelY, accelX + width, accelY + height ); // set bounds of rectangle
             
-            // Create new paint object
+            // Create new paint object and selecting color
             p = new Paint();
             p.setColor(Color.WHITE);
 
-            //canvas.drawOval(oval, p);
-            // canvas.drawCircle(screenWidth/2, accelY, 50+(accelY/4), p);
-            drawCircles(canvas, xMid, yMid, radius + accelY/2);
+            // Selecting what to draw
+
+            //drawCloud(canvas, xMid, yMid, radius + accelY/2);
+            drawSquares(canvas, xMid, yMid, radius + accelY/2);
+
             invalidate();
         }
 
-        protected void drawCircles(Canvas canvas, int xMid, int yMid, int radius){
+        // ============
+        // Draws Cloud
+        // ============
+        protected void drawCloud(Canvas canvas, int xMid, int yMid, int radius){
 
             if (radius <= 1) { return; }
+            canvas.drawCircle(xMid, yMid - radius, radius, p); // draw first circle
+            drawCloud(canvas, xMid-radius, yMid, radius/2);  // draw circle to the left
+            drawCloud(canvas, xMid+radius, yMid, radius/2);  // draw circle to the right
+        }
 
-            // draw first circle
-            canvas.drawCircle(xMid, yMid - radius, radius, p);
+        // ============
+        // Draws Squares
+        // ============
+        protected void drawSquares(Canvas canvas, int xMid, int yMid, int radius){
 
-            //draw circle to the left
-            drawCircles(canvas, xMid-radius, yMid, radius/2);
-
-            //draw circle to the right
-            drawCircles(canvas, xMid+radius, yMid, radius/2);
-
+            if (radius <= 1) { return; }
+            canvas.drawRect(xMid, yMid - radius, radius, radius + screenHeight/2, p); // draw first square
+            drawSquares(canvas, xMid-radius, yMid, radius/2);  // draw square to the left
+            drawSquares(canvas, xMid+radius, yMid, radius/2);  // draw square to the right
         }
     }
 }
