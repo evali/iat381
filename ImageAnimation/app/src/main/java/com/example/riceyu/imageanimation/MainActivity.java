@@ -27,7 +27,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     public int xMid, yMid;
     private int screenWidth, screenHeight;
     public int radius = 100;
-    
+
     public Paint p;
 
     private Sensor Accelerometer;
@@ -103,7 +103,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         protected void onDraw(Canvas canvas) {
             RectF oval = new RectF(accelX, accelY, accelX + width, accelY + height ); // set bounds of rectangle
-
+            
             // Create new paint object
             p = new Paint();
             p.setColor(Color.WHITE);
