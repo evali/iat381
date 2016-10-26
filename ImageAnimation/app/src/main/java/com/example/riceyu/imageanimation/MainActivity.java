@@ -14,32 +14,47 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.v4.view.GestureDetectorCompat;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Display;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
+import android.gesture.Gesture;
+import static android.view.GestureDetector.*;
 
-public class MainActivity extends Activity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
     CustomDrawableView mCustomDrawableView = null;
     ShapeDrawable mDrawable = new ShapeDrawable();
 
     // Position and Acceleration values for drawing the shapes
     public static int accelX;
     public static int accelY;
-    public int xMid, yMid;
+    public int xMid, yMid, xPos, yPos;
     private int screenWidth, screenHeight;
     public int radius = 100;
 
-    public Paint p;
+    public Paint p = new Paint();
+    public LinearLayout parent;
+    private MotionEvent simulationEvent;
 
     private Sensor Accelerometer;
     private SensorManager sensorManager = null;
 
+    private GestureDetectorCompat gestureDetect;
+
+    private static final String TAG = "MyActivity";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Get a reference to a SensorManager
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        Accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        setContentView(R.layout.activity_main);
+        parent = (LinearLayout) findViewById(R.id.parent);
 
         // Get width and height of screen
         Display display = getWindowManager().getDefaultDisplay();
@@ -47,16 +62,22 @@ public class MainActivity extends Activity implements SensorEventListener {
         display.getSize(size);
         screenWidth = size.x;
         screenHeight = size.y;
-
         xMid = screenWidth/2;
         yMid = screenHeight/2;
+
+        // Get a reference to a SensorManager
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        Accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         // Create new drawable View
         mCustomDrawableView = new CustomDrawableView(this);
         setContentView(mCustomDrawableView);
-
         View view = this.getWindow().getDecorView();
         view.setBackgroundColor(Color.BLACK);
+
+        // Get Gesture Objects
+        gestureDetect = new GestureDetectorCompat(this, this);
+        gestureDetect.setOnDoubleTapListener(this);
     }
 
     // This method will update the UI on new sensor events
@@ -90,7 +111,73 @@ public class MainActivity extends Activity implements SensorEventListener {
         super.onStop();
     }
 
-    public class CustomDrawableView extends View {
+    // =========================
+    // Gesture Listener Methods
+    // =========================
+
+    @Override
+    public boolean onTouchEvent(MotionEvent e){
+        xPos = (int) e.getX();
+        yPos = (int) e.getY();
+
+        this.gestureDetect.onTouchEvent(e);
+        Toast toast = Toast.makeText(getApplication(), "Touched screen", Toast.LENGTH_LONG);
+        toast.show();
+        return super.onTouchEvent(e);
+    }
+
+    @Override
+    public boolean onDown(MotionEvent e) {
+        p.setColor(Color.rgb(xPos, yPos, 255));
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+        Log.i(TAG,"Touched: " + e.toString());
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        // p.setColor(Color.BLUE);
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        p.setColor(Color.rgb(xPos, yPos, 255));
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+    }
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        return false;
+    }
+
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onDoubleTap(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent e) {
+        return false;
+    }
+
+    // ========================
+    // Custom View Class
+    // ========================
+
+    public class CustomDrawableView extends View{
         static final int width = 50;
         static final int height = 50;
 
@@ -102,16 +189,14 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
 
         protected void onDraw(Canvas canvas) {
-            RectF oval = new RectF(accelX, accelY, accelX + width, accelY + height ); // set bounds of rectangle
-            
+
             // Create new paint object and selecting color
-            p = new Paint();
-            p.setColor(Color.WHITE);
+            // p = new Paint();
+            // p.setColor(Color.WHITE);
 
             // Selecting what to draw
-
-            //drawCloud(canvas, xMid, yMid, radius + accelY/2);
-            drawSquares(canvas, xMid, yMid, radius + accelY/2);
+            drawCloud(canvas, xMid - accelX, yMid, radius + accelY/2);
+            // drawSquares(canvas, xMid, yMid, radius + accelY/2);
 
             invalidate();
         }
@@ -137,5 +222,6 @@ public class MainActivity extends Activity implements SensorEventListener {
             drawSquares(canvas, xMid-radius, yMid, radius/2);  // draw square to the left
             drawSquares(canvas, xMid+radius, yMid, radius/2);  // draw square to the right
         }
+
     }
 }
