@@ -30,8 +30,6 @@ import android.widget.ToggleButton;
 import android.widget.VideoView;
 
 
-
-
 public class MainActivity extends AppCompatActivity{
 
     VideoView vv;
@@ -49,9 +47,6 @@ public class MainActivity extends AppCompatActivity{
     public Handler handler = new Handler();
 
     public int lastLevel = 0;
-
-
-
 
 
     @Override
@@ -90,7 +85,6 @@ public class MainActivity extends AppCompatActivity{
         Spinner graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
         ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_item);
         graphicSpinner.setAdapter(adapter3);
-
 
         //loop video
         vv = (VideoView) findViewById(R.id.videoView01);

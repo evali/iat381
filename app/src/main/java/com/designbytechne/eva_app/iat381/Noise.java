@@ -35,9 +35,6 @@ public class Noise extends AppCompatActivity {
     private int lastLevel = 0;
 
 
-
-
-
     private SensorManager mySensorManager;
 
     protected void onCreate(Bundle savedInstanceState) {
