@@ -13,6 +13,14 @@
     tools:context="com.designbytechne.eva_app.iat381.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <VideoView
+        android:layout_width="wrap_content"
+        android:layout_height="321dp"
+        android:id="@+id/videoView01"
+        android:layout_weight="1"
+        android:layout_alignParentBottom="true"
+        />
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -24,7 +32,20 @@
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:id="@+id/tableLayout">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ProgressBar
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/progressbar_level" />
+            </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
@@ -79,11 +100,12 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/moveToggleButton"
                     android:layout_weight="1"
-                    android:textOff="Move Off"
-                    android:textOn="Move On" />
+                    android:textOff="Move On"
+                    android:textOn="Move Off" />
             </TableRow>
 
         </TableLayout>
 
     </LinearLayout>
+
 </RelativeLayout>
