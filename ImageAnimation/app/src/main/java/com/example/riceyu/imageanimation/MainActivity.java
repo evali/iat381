@@ -13,6 +13,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -45,6 +48,13 @@ public class MainActivity extends Activity implements SensorEventListener, Gestu
 
     private Sensor Accelerometer;
     private SensorManager sensorManager = null;
+
+    private MediaPlayer mp;
+    private AudioManager am;
+    private Visualizer audioOutput = null;
+    public float intensity = 0;
+    public int intensityInt = 0;
+    private int volLevel;
 
     private GestureDetectorCompat gestureDetect;
 
@@ -82,6 +92,13 @@ public class MainActivity extends Activity implements SensorEventListener, Gestu
         // Setting up paint object
         p = new Paint();
         p.setColor(Color.WHITE);
+
+        // Create new Media Player
+        mp = MediaPlayer.create(getApplicationContext(),R.raw.shift);
+        AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+        volLevel= am.getStreamVolume(AudioManager.STREAM_MUSIC);
+        mp.start();
+        createVisualizer();
     }
 
     // This method will update the UI on new sensor events
@@ -115,9 +132,9 @@ public class MainActivity extends Activity implements SensorEventListener, Gestu
         super.onStop();
     }
 
-    // =========================
+    // ==================================================================================
     // Gesture Listener Methods
-    // =========================
+    // =================================================================================
 
     @Override
     public boolean onTouchEvent(MotionEvent e){
@@ -177,9 +194,37 @@ public class MainActivity extends Activity implements SensorEventListener, Gestu
         return false;
     }
 
-    // ========================
+    // ==================================================================================
+    // Audio Visualizer
+    // ==================================================================================
+
+    private void createVisualizer(){
+        int rate = Visualizer.getMaxCaptureRate();
+        int audio = mp.getAudioSessionId();
+
+        audioOutput = new Visualizer(audio); // get output audio stream
+        audioOutput.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+
+            @Override
+            public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
+                intensity = ((float) waveform[0] + 128f) / 256;
+                intensityInt = (int)intensity;
+                Log.d("vis", String.valueOf(intensity));
+            }
+
+            @Override
+            public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
+
+            }
+        },rate , true, false); // waveform not freq data
+        Log.d("rate", String.valueOf(Visualizer.getMaxCaptureRate()));
+        audioOutput.setEnabled(true);
+    }
+
+
+    // ==================================================================================
     // Custom View Class
-    // ========================
+    // ==================================================================================
 
     public class CustomDrawableView extends View{
         static final int width = 50;
@@ -194,15 +239,18 @@ public class MainActivity extends Activity implements SensorEventListener, Gestu
 
         protected void onDraw(Canvas canvas) {
             // Selecting what to draw
-            drawCloud(canvas, xMid, yMid+(accelY/3), radius + accelY/2);
+            Toast.makeText(getApplication(), "Volume: " + intensityInt, Toast.LENGTH_LONG).show();
+
+            drawCloud(canvas, xMid, yMid+(accelY/3), intensityInt);
+            // drawCloud(canvas, xMid, yMid+(accelY/3), radius + accelY/2);
             // drawSquares(canvas, xMid, yMid, radius + accelY/2);
 
             invalidate();
         }
 
-        // ============
+        // ====================
         // Draws Cloud
-        // ============
+        // ====================
         protected void drawCloud(Canvas canvas, int xMid, int yMid, int radius){
 
             if (radius <= 1) { return; }
@@ -211,9 +259,9 @@ public class MainActivity extends Activity implements SensorEventListener, Gestu
             drawCloud(canvas, xMid+radius+accelX, yMid-accelY, radius/2);  // draw circle to the right
         }
 
-        // ============
+        // ====================
         // Draws Squares
-        // ============
+        // ====================
         protected void drawSquares(Canvas canvas, int xMid, int yMid, int radius){
 
             if (radius <= 1) { return; }

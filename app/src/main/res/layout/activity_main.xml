@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:fitsSystemWindows="true"
-    tools:context="com.designbytechne.eva_app.iat381.MainActivity">
-
+    tools:context="com.designbytechne.eva_app.iat381.MainActivity"
+    android:id="@+id/activityMain"
+    >
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -33,4 +36,23 @@
         app:srcCompat="@android:drawable/ic_media_play"
         app:backgroundTint="@android:color/holo_blue_dark" />
 
-</android.support.design.widget.CoordinatorLayout>
+    <!--<LinearLayout android:id="@+id/topLinearLayout"-->
+        <!--android:orientation="vertical"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_width="fill_parent">-->
+    <!--</LinearLayout>-->
+
+    <!--<view class ="com.designbytechne.eva_app.iat381.CustomDrawableView"-->
+        <!--android:id="@+id/custom_drawable_view"-->
+        <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content" />-->
+
+    <!--<com.designbytechne.eva_app.iat381.CustomDrawableView-->
+        <!--android:id="@+id/custom_drawable_view"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--/>-->
+
+</LinearLayout>
