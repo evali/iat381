@@ -32,8 +32,6 @@ import android.widget.Toast;
 
 public class CustomDrawableView extends View{
 
-    SensorActivity mySA;
-
     // Position and Acceleration values for drawing the shapes
     private static int accelX;
     private static int accelY;
@@ -41,10 +39,15 @@ public class CustomDrawableView extends View{
     private static int screenWidth, screenHeight;
     public  int radius;
 
+    private boolean circular, square;
+
     private Paint p;
 
-    CustomDrawableView mCustomDrawableView;
     static ShapeDrawable mDrawable = new ShapeDrawable();
+
+    // ==================================================================================
+    // CustomDrawableView Constructor
+    // ==================================================================================
 
     public CustomDrawableView(Context context) {
         super(context);
@@ -55,20 +58,109 @@ public class CustomDrawableView extends View{
         mDrawable.getPaint().setColor(0xff74AC23);
         mDrawable.setBounds(accelX, accelY, accelX + screenWidth, accelY + screenHeight);
 
+//         p = new Paint();
+//         p.setColor(Color.WHITE);
     }
 
+    // ==================================================================================
+    // Set Methods
+    // ==================================================================================
+
+    public void setAccelX(int accelX){
+        this.accelX = accelX;
+    }
+    public void setAccelY(int accelY){
+        this.accelY = accelY;
+    }
+    public void setXPos(int xPos){
+        this.xPos = xPos;
+    }
+    public void setYPos(int yPos){
+        this.yPos = yPos;
+    }
+    public void setXMid(int xMid){
+        this.xMid = xMid;
+    }
+    public void setYMid(int yMid){
+        this.yMid = yMid;
+    }
+
+    public void setHeight(int height){
+        this.screenHeight = height;
+    }
+    public void setWidth(int width){
+        this.screenWidth = width;
+    }
+    public void setRadius(int radius){
+        this.radius = radius;
+    }
+    public void setPaint(Paint paint) {this.p = paint;}
+
+    public void setCircular(Boolean b) {this.circular = b; }
+    public void setSquare(Boolean b) {this.square = b; }
+
+
+    // ==================================================================================
+    // Get Methods
+    // ==================================================================================
+
+    public int getAccelX(){
+        return this.accelX;
+    }
+    public int getAccelY(){
+        return this.accelY;
+    }
+    public int getXMid(){
+        return this.xMid;
+    }
+    public int getYMid(){
+        return this.yMid;
+    }
+    public int getXPos(){
+        return this.xPos;
+    }
+    public int getYPos(){
+        return this.yPos;
+    }
+
+    public int getScreenWidth(){
+        return this.screenWidth;
+    }
+    public int getScreenHeight(){
+        return this.screenHeight;
+    }
+    public int getRadius(){
+        return this.radius;
+    }
+    public Paint getPaint(){
+        return this.p;
+    }
+
+    public boolean getCircular() { return this.circular; }
+    public boolean getSquare() { return this.square; }
+
+
+    // ==================================================================================
+    // onDraw
+    // ==================================================================================
+
     protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        // Setting paint colour
+        p = new Paint();
+        p.setColor(Color.rgb(getXPos(), getYPos(), 255));
+
         // Selecting what to draw
-
-        drawCloud(canvas, 250, 500, 300);
-        // canvas.drawCircle(50,50,50, p);
-        Toast.makeText(getContext(),"radius " + radius,Toast.LENGTH_LONG).show();
-
-        // Toast.makeText(getApplication(), "Volume: " + intensityInt, Toast.LENGTH_LONG).show();
+        if(getCircular() == true ) {
+            drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), getRadius() + getAccelY() / 2);
+        }
+        if(getSquare() == true){
+            drawSquares(canvas, getXMid(), getYMid(), getRadius() + getAccelY()/2);
+        }
 
 //        drawCloud(canvas, 250, 250, mRadius);
 //        drawCloud(canvas, xMid, yMid+(accelY/3), radius + accelY/2);
-//        drawSquares(canvas, mySA.getXMid(), mySA.getYMid(), mySA.getRadius() + mySA.getAccelY()/2);
         invalidate();
     }
 

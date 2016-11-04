@@ -45,8 +45,6 @@
 
         <activity android:name=".Noise"></activity>
 
-        <activity android:name=".ImageAnimation"></activity>
-
         <!--<activity android:name=".CustomDrawableView"></activity>-->
 
     </application>

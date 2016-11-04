@@ -40,6 +40,7 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.VideoView;
@@ -58,15 +59,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public int bufferSize;
 
     public ProgressBar level;
-
     public Handler handler = new Handler();
-
     public int lastLevel = 0;
 
-    SensorActivity myImageAnimation;
-
     // Create custom DrawableView
-    CustomDrawableView mCustomDrawableView;
+    CustomDrawableView myView;
     static ShapeDrawable mDrawable = new ShapeDrawable();
 
     // Position and Acceleration values for drawing the shapes
@@ -76,9 +73,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static int screenWidth, screenHeight;
     public static int radius = 100;
 
-    public static Paint p;
+    public static Paint p = new Paint();
     public LinearLayout parent;
-    private MotionEvent simulationEvent;
 
     private Sensor Accelerometer;
     private SensorManager sensorManager = null;
@@ -86,15 +82,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private MediaPlayer mp;
     private AudioManager am;
     private Visualizer audioOutput = null;
-    public float intensity = 0;
-    public int intensityInt = 0;
-    private int volLevel;
+
+    private Spinner patternSpinner, themeSpinner, graphicSpinner;
 
     private GestureDetectorCompat gestureDetect;
+    private TextView accelXTextView;
 
     private static final String TAG = "MyActivity";
 
-    SensorActivity mySA;
     CustomDrawableView mCustomView;
     LinearLayout.LayoutParams params;
 
@@ -102,15 +97,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT); // 2 pixels height
-        // ((LinearLayout) findViewById(R.id.topLinearLayout)).addView(new CustomDrawableView(this), params);
-        ((LinearLayout) findViewById(R.id.topLinearLayout)).addView(new ImageAnimation().new CustomDrawableView(this), params);
+        Canvas canvas = new Canvas();
 
-        mySA = new SensorActivity();
-//        LinearLayout ll = (LinearLayout) findViewById(R.id.activityMain);
-//        mCustomView = new CustomDrawableView(this);
-//        ll.addView(mCustomView);
-        // setContentView(ll);
+        myView = new CustomDrawableView(this);
+//        myView.setAccelX(this.accelX);
+//        myView.setAccelY(this.accelY);
+
+        myView.draw(canvas);
+        myView.invalidate();
+
+        accelXTextView = (TextView) findViewById(R.id.accelXTextView);
+
+        params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT); // 2 pixels height
+        ((LinearLayout) findViewById(R.id.topLinearLayout)).addView(new CustomDrawableView(this), params);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -124,24 +123,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-//      musicToggleButton = (ToggleButton) findViewById(R.id.musicToggleButton);
         moveToggleButton = (ToggleButton) findViewById(R.id.moveToggleButton);
 
-        Spinner patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item);
-        // Specify the layout to use when the list of choices appears
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        patternSpinner.setAdapter(adapter);
+        // patternSpinner
+        patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
+        patternSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item); // Create an ArrayAdapter using the string array and a default spinner layout
+        patternSpinner.setAdapter(adapter); // Apply the adapter to the spinner
 
-        Spinner themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
+        // themeSpinner
+        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
+        themeSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
         ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.theme_array, android.R.layout.simple_spinner_item);
         themeSpinner.setAdapter(adapter2);
 
-        Spinner graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
+        // graphicSpinner
+        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
+        graphicSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
         ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_item);
         graphicSpinner.setAdapter(adapter3);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
 
         //loop video
         vv = (VideoView) findViewById(R.id.videoView01);
@@ -213,9 +215,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-        // =================================================================================
+        // ==============================================
         // CustomDrawableView objects
-        // =================================================================================
+        // ==============================================
 
         // Get width and height of screen
         Display display = getWindowManager().getDefaultDisplay();
@@ -223,8 +225,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         display.getSize(size);
         screenWidth = size.x;
         screenHeight = size.y;
+
         xMid = screenWidth/2;
         yMid = screenHeight/2;
+        myView.setXMid(this.xMid);
+        myView.setYMid(this.yMid);
 
         // Get a reference to a SensorManager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -242,8 +247,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         gestureDetect.setOnDoubleTapListener(this);
 
         // Setting up paint object
-        p = new Paint();
-        p.setColor(Color.WHITE);
+//        p.setColor(Color.WHITE);
+//        myView.setPaint(this.p);
 
         // Create new Media Player
 //        mp = MediaPlayer.create(getApplicationContext(),R.raw.shift);
@@ -256,6 +261,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     } // End of onCreate()
 
 
+    // get the selected dropdown list value
+    public void addListenerOnButton() {
+
+        patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
+        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
+        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
+        // btnSubmit = (Button) findViewById(R.id.btnSubmit);
+
+        patternSpinner.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                if( String.valueOf(patternSpinner.getSelectedItem()) == "Spiky"){
+                    // Toast.makeText(getApplication(), "Spiky Select", Toast.LENGTH_LONG).show();
+                }
+            }
+
+        });
+    }
 
     public void readAudioBuffer() {
 
@@ -350,11 +375,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     // This method will update the UI on new sensor events
     public void onSensorChanged(SensorEvent sensorEvent) {
+        float[] g = sensorEvent.values.clone();
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            accelX = (int) Math.pow(sensorEvent.values[0], 3);
-            accelY = (int) Math.pow(sensorEvent.values[1], 3);
+            accelX = (int) Math.pow(g[0], 3);
+            accelY = (int) Math.pow(g[1], 3);
+
+            myView.setAccelX(this.accelX);
+            myView.setAccelY(this.accelY);
+            accelXTextView.setText("AccelX: " + accelX);
         }
+
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
 
         }
@@ -387,6 +418,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public boolean onTouchEvent(MotionEvent e){
         xPos = (int) e.getX();
         yPos = (int) e.getY();
+        myView.setXPos(this.xPos);
+        myView.setYPos(this.yPos);
 
         this.gestureDetect.onTouchEvent(e);
         Toast toast = Toast.makeText(getApplication(), "Touched screen", Toast.LENGTH_LONG);
@@ -445,28 +478,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // Audio Visualizer
     // ==================================================================================
 
-    private void createVisualizer(){
-        int rate = Visualizer.getMaxCaptureRate();
-        int audio = mp.getAudioSessionId();
-
-        audioOutput = new Visualizer(audio); // get output audio stream
-        audioOutput.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
-
-            @Override
-            public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
-                intensity = ((float) waveform[0] + 128f) / 256;
-                intensityInt = (int)intensity;
-                Log.d("vis", String.valueOf(intensity));
-            }
-
-            @Override
-            public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
-
-            }
-        },rate , true, false); // waveform not freq data
-        Log.d("rate", String.valueOf(Visualizer.getMaxCaptureRate()));
-        audioOutput.setEnabled(true);
-    }
+//    private void createVisualizer(){
+//        int rate = Visualizer.getMaxCaptureRate();
+//        int audio = mp.getAudioSessionId();
+//
+//        audioOutput = new Visualizer(audio); // get output audio stream
+//        audioOutput.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+//
+//            @Override
+//            public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
+//                intensity = ((float) waveform[0] + 128f) / 256;
+//                intensityInt = (int)intensity;
+//                Log.d("vis", String.valueOf(intensity));
+//            }
+//
+//            @Override
+//            public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
+//
+//            }
+//        },rate , true, false); // waveform not freq data
+//        Log.d("rate", String.valueOf(Visualizer.getMaxCaptureRate()));
+//        audioOutput.setEnabled(true);
+//    }
 
 
     // ==================================================================================
@@ -487,7 +520,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //        protected void onDraw(Canvas canvas) {
 //            super.onDraw(canvas);
 //            // Selecting what to draw
-////            Toast.makeText(getApplication(), "Volume: " + intensityInt, Toast.LENGTH_LONG).show();
+////            Toast.makeText(getApplication(), "Volume: " + intensityInt, Toast.LENGTH_LONG).show();Toast.make
 //
 //            drawCloud(canvas, xMid, yMid+(accelY/3), radius + accelY/2);
 //            // drawCloud(canvas, xMid, yMid+(accelY/3), radius + accelY/2);
