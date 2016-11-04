@@ -31,7 +31,7 @@ import android.widget.Toast;
 import android.gesture.Gesture;
 import static android.view.GestureDetector.*;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
+public class MainActivity extends Activity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
     CustomDrawableView mCustomDrawableView = null;
     ShapeDrawable mDrawable = new ShapeDrawable();
 
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int screenWidth, screenHeight;
     public int radius = 100;
 
-    public Paint p = new Paint();
+    public Paint p;
     public LinearLayout parent;
     private MotionEvent simulationEvent;
 
@@ -238,13 +238,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         protected void onDraw(Canvas canvas) {
-
-            // Create new paint object and selecting color
-            // p = new Paint();
-            // p.setColor(Color.WHITE);
-
             // Selecting what to draw
-
             Toast.makeText(getApplication(), "Volume: " + intensityInt, Toast.LENGTH_LONG).show();
 
             drawCloud(canvas, xMid, yMid+(accelY/3), intensityInt);
@@ -261,8 +255,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             if (radius <= 1) { return; }
             canvas.drawCircle(xMid, yMid - radius, radius, p); // draw first circle
-            drawCloud(canvas, xMid-radius, yMid, radius/2);  // draw circle to the left
-            drawCloud(canvas, xMid+radius, yMid, radius/2);  // draw circle to the right
+            drawCloud(canvas, xMid-radius-accelX, yMid+accelY, radius/2);  // draw circle to the left
+            drawCloud(canvas, xMid+radius+accelX, yMid-accelY, radius/2);  // draw circle to the right
         }
 
         // ====================
