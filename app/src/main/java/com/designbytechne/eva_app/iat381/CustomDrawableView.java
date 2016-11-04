@@ -37,9 +37,14 @@ public class CustomDrawableView extends View{
     private static int accelY;
     private static int xMid, yMid, xPos, yPos;
     private static int screenWidth, screenHeight;
-    public  int radius;
+    private static int radius;
 
-    private boolean circular, square;
+    private static int level;
+
+    private static boolean circular, square;
+
+    private String pattern;
+    private static String patternString;
 
     private Paint p;
 
@@ -57,6 +62,8 @@ public class CustomDrawableView extends View{
         mDrawable = new ShapeDrawable(new OvalShape());
         mDrawable.getPaint().setColor(0xff74AC23);
         mDrawable.setBounds(accelX, accelY, accelX + screenWidth, accelY + screenHeight);
+
+        pattern = getPatternString();
 
 //         p = new Paint();
 //         p.setColor(Color.WHITE);
@@ -96,8 +103,12 @@ public class CustomDrawableView extends View{
     }
     public void setPaint(Paint paint) {this.p = paint;}
 
+    public void setLevel(int level) {this.level = level;}
+
     public void setCircular(Boolean b) {this.circular = b; }
     public void setSquare(Boolean b) {this.square = b; }
+
+    public void setPatternString(String s){this.patternString = s;}
 
 
     // ==================================================================================
@@ -136,8 +147,12 @@ public class CustomDrawableView extends View{
         return this.p;
     }
 
+    public int getLevel() {return this.level; }
+
     public boolean getCircular() { return this.circular; }
     public boolean getSquare() { return this.square; }
+
+    public String getPatternString() {return this.patternString; }
 
 
     // ==================================================================================
@@ -152,12 +167,25 @@ public class CustomDrawableView extends View{
         p.setColor(Color.rgb(getXPos(), getYPos(), 255));
 
         // Selecting what to draw
-        if(getCircular() == true ) {
-            drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), getRadius() + getAccelY() / 2);
-        }
-        if(getSquare() == true){
-            drawSquares(canvas, getXMid(), getYMid(), getRadius() + getAccelY()/2);
-        }
+        drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), 100 + getLevel()/3 );
+//        Toast.makeText(getContext(), "Pattern " + pattern, Toast.LENGTH_SHORT).show();
+
+//        if(pattern.equals("Circular")) {
+//            drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), getRadius() + getAccelY() / 2);
+//        }
+//        else if(pattern.equals("Square")){
+//            drawSquares(canvas, getXMid(), getYMid(), getRadius() + getAccelY()/2);
+//        }
+//        else{
+//            Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
+//        }
+
+//        if(getCircular() == true ) {
+//            drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), getRadius() + getAccelY() / 2);
+//        }
+//        if(getSquare() == true){
+//            drawSquares(canvas, getXMid(), getYMid(), getRadius() + getAccelY()/2);
+//        }
 
 //        drawCloud(canvas, 250, 250, mRadius);
 //        drawCloud(canvas, xMid, yMid+(accelY/3), radius + accelY/2);

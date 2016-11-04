@@ -13,11 +13,24 @@
     tools:context="com.designbytechne.eva_app.iat381.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/accelXTextView"
-        />
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/accelXTextView"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/levelTextView"
+            />
+
+    </LinearLayout>
 
     <VideoView
         android:layout_width="wrap_content"
@@ -58,21 +71,23 @@
                 android:layout_height="match_parent" >
 
                 <Spinner
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:id="@+id/patternSpinner"
-                    android:layout_weight="1"/>
-
-                <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    />
+
+
+                <Spinner
                     android:id="@+id/graphicSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"/>
 
                 <Spinner
+                    android:id="@+id/themeSpinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/themeSpinner"
                     android:layout_weight="1"/>
 
                 <TableRow

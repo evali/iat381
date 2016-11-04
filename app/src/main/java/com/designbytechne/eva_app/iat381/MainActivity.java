@@ -35,6 +35,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
@@ -45,6 +46,8 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.VideoView;
 
+import java.io.DataOutputStream;
+
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
 
@@ -52,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     ToggleButton moveToggleButton;
 
-    public static final int sampleRate = 11025;
+    public static final int sampleRate = 8000;
     public static final int bufferSizeFactor = 10;
 
     public AudioRecord audio;
@@ -61,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public ProgressBar level;
     public Handler handler = new Handler();
     public int lastLevel = 0;
+    public DataOutputStream output;
 
     // Create custom DrawableView
     CustomDrawableView myView;
@@ -71,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static int accelY;
     public static int xMid, yMid, xPos, yPos;
     private static int screenWidth, screenHeight;
-    public static int radius = 100;
+    public static int radius;
 
     public static Paint p = new Paint();
     public LinearLayout parent;
@@ -86,30 +90,35 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Spinner patternSpinner, themeSpinner, graphicSpinner;
 
     private GestureDetectorCompat gestureDetect;
-    private TextView accelXTextView;
+    private TextView accelXTextView, levelTextView;
 
     private static final String TAG = "MyActivity";
 
     CustomDrawableView mCustomView;
     LinearLayout.LayoutParams params;
 
+    // =================================================================================
+    // onCreate Method
+    // =================================================================================
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         Canvas canvas = new Canvas();
-
         myView = new CustomDrawableView(this);
-//        myView.setAccelX(this.accelX);
-//        myView.setAccelY(this.accelY);
-
         myView.draw(canvas);
         myView.invalidate();
 
         accelXTextView = (TextView) findViewById(R.id.accelXTextView);
+        levelTextView = (TextView) findViewById((R.id.levelTextView));
 
         params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT); // 2 pixels height
         ((LinearLayout) findViewById(R.id.topLinearLayout)).addView(new CustomDrawableView(this), params);
+
+        // ==============================================
+        // Dropdown Menu (Spinner)
+        // ==============================================
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -145,6 +154,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
 
+        // ==============================================
+        // Video
+        // ==============================================
+
         //loop video
         vv = (VideoView) findViewById(R.id.videoView01);
 
@@ -161,9 +174,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         vv.requestFocus();
 //      vv.start();
 
-        //audio detection
-        level = (ProgressBar) findViewById(R.id.progressbar_level);
+        // ==============================================
+        // Audio Detection
+        // ==============================================
 
+        level = (ProgressBar) findViewById(R.id.progressbar_level);
         level.setMax(32676);
 
         ToggleButton record = (ToggleButton) findViewById(R.id.musicToggleButton);
@@ -180,13 +195,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         record.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // TODO Auto-generated method stub
-
                 try {
                     if (isChecked) {
 
-                        bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT) * bufferSizeFactor;
-                        audio = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+                        try {Thread.sleep(1);}
+                        catch (Exception e) {}
+
+                        bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+                        audio = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
                         audio.startRecording();
 
                         Thread thread = new Thread(new Runnable() {
@@ -196,7 +212,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         });
 
                         thread.setPriority(Thread.currentThread().getThreadGroup().getMaxPriority());
-
                         thread.start();
 
                         handler.removeCallbacks(update);
@@ -231,24 +246,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         myView.setXMid(this.xMid);
         myView.setYMid(this.yMid);
 
+        radius = 100;
+        myView.setRadius(radius);
+
         // Get a reference to a SensorManager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
-        // Create new drawable View
-        // mCustomDrawableView = new CustomDrawableView(this);
-        // mCustomDrawableView = (CustomDrawableView) findViewById(R.id.custom_drawable_view);
-        // setContentView(mCustomDrawableView);
         View view = this.getWindow().getDecorView();
         view.setBackgroundColor(Color.BLACK);
 
         // Get Gesture Objects
         gestureDetect = new GestureDetectorCompat(this, this);
         gestureDetect.setOnDoubleTapListener(this);
-
-        // Setting up paint object
-//        p.setColor(Color.WHITE);
-//        myView.setPaint(this.p);
 
         // Create new Media Player
 //        mp = MediaPlayer.create(getApplicationContext(),R.raw.shift);
@@ -260,6 +270,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     } // End of onCreate()
 
+
+    // =================================================================================
+    // Spinner button listener
+    // =================================================================================
+
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        // An item was selected. You can retrieve the selected item using
+
+        String graphicString = parent.getItemAtPosition(pos).toString();
+
+        if(graphicString == "Circular"){
+            Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
+        }
+
+    }
 
     // get the selected dropdown list value
     public void addListenerOnButton() {
@@ -282,6 +307,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
     }
 
+    // =================================================================================
+    // Audio Methods
+    // =================================================================================
+
     public void readAudioBuffer() {
 
         try {
@@ -291,7 +320,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             do {
                 bufferReadResult = audio.read(buffer, 0, bufferSize);
 
+                double sum = 0;
+
                 for (int i = 0; i < bufferReadResult; i++){
+                    output.writeShort(buffer [i]);
+                    sum += buffer [i] * buffer [i];
+
                     if (buffer[i] > lastLevel) {
                         lastLevel = buffer[i];
                     }
@@ -315,9 +349,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         public void run() {
             MainActivity.this.level.setProgress(lastLevel);
             lastLevel *= .5;
+            myView.setLevel(lastLevel);
+            levelTextView.setText("Level: " + lastLevel);
+
             handler.postAtTime(this, SystemClock.uptimeMillis() + 500);
         }
     };
+
+    // =================================================================================
+    // Saved Instance State
+    // =================================================================================
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -422,8 +463,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         myView.setYPos(this.yPos);
 
         this.gestureDetect.onTouchEvent(e);
-        Toast toast = Toast.makeText(getApplication(), "Touched screen", Toast.LENGTH_LONG);
-        toast.show();
+//        Toast toast = Toast.makeText(getApplication(), "Touched screen", Toast.LENGTH_LONG);
+//        toast.show();
         return super.onTouchEvent(e);
     }
 
