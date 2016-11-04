@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     ToggleButton moveToggleButton;
 
-    public static final int sampleRate = 8000;
+    public static final int sampleRate = 11025;
     public static final int bufferSizeFactor = 10;
 
     public AudioRecord audio;
@@ -198,8 +198,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 try {
                     if (isChecked) {
 
-                        try {Thread.sleep(1);}
-                        catch (Exception e) {}
+//                        try {Thread.sleep(1);}
+//                        catch (Exception e) {}
 
                         bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
                         audio = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
@@ -323,8 +323,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 double sum = 0;
 
                 for (int i = 0; i < bufferReadResult; i++){
-                    output.writeShort(buffer [i]);
-                    sum += buffer [i] * buffer [i];
+//                    output.writeShort(buffer [i]);
+//                    sum += buffer [i] * buffer [i];
 
                     if (buffer[i] > lastLevel) {
                         lastLevel = buffer[i];
@@ -348,11 +348,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         public void run() {
             MainActivity.this.level.setProgress(lastLevel);
-            lastLevel *= .5;
-            myView.setLevel(lastLevel);
+            lastLevel *= .04;
+            int updateLastlevel = (int) Math.round(lastLevel * .2);
+
+            myView.setLevel(updateLastlevel);
             levelTextView.setText("Level: " + lastLevel);
 
-            handler.postAtTime(this, SystemClock.uptimeMillis() + 500);
+            handler.postAtTime(this, SystemClock.uptimeMillis() + 30);
         }
     };
 

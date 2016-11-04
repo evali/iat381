@@ -41,7 +41,7 @@ public class CustomDrawableView extends View{
 
     private static int level;
 
-    private static boolean circular, square;
+    public static boolean circular, square;
 
     private String pattern;
     private static String patternString;
@@ -187,8 +187,7 @@ public class CustomDrawableView extends View{
 //            drawSquares(canvas, getXMid(), getYMid(), getRadius() + getAccelY()/2);
 //        }
 
-//        drawCloud(canvas, 250, 250, mRadius);
-//        drawCloud(canvas, xMid, yMid+(accelY/3), radius + accelY/2);
+
         invalidate();
     }
 
