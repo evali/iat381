@@ -1,5 +1,6 @@
 package com.designbytechne.eva_app.iat381;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -35,6 +36,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
@@ -49,7 +51,7 @@ import android.widget.VideoView;
 import java.io.DataOutputStream;
 
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
     VideoView vv;
 
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public DataOutputStream output;
 
     // Create custom DrawableView
-    CustomDrawableView myView;
+    public static CustomDrawableView myView;
     static ShapeDrawable mDrawable = new ShapeDrawable();
 
     // Position and Acceleration values for drawing the shapes
@@ -91,10 +93,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private GestureDetectorCompat gestureDetect;
     private TextView accelXTextView, levelTextView;
+    public static String selected;
 
     private static final String TAG = "MyActivity";
 
-    CustomDrawableView mCustomView;
     LinearLayout.LayoutParams params;
 
     // =================================================================================
@@ -103,10 +105,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         setContentView(R.layout.activity_main);
 
         Canvas canvas = new Canvas();
         myView = new CustomDrawableView(this);
+        myView.setPatternString("Nothing");
         myView.draw(canvas);
         myView.invalidate();
 
@@ -134,19 +139,51 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         moveToggleButton = (ToggleButton) findViewById(R.id.moveToggleButton);
 
-        // patternSpinner
+        // ==================
+        // Pattern Spinner
+        // ==================
         patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
-        patternSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+        patternSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selected = parent.getItemAtPosition(position).toString();
+
+                if(selected.equals("Circular")){
+                    Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
+                    myView.setPatternString("Circular");
+                }
+
+                else if(selected.equals("Square")){
+                    Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
+                    myView.setPatternString("Square");
+                }
+
+                else{
+                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
+                    myView.setPatternString("Nothing");
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item); // Create an ArrayAdapter using the string array and a default spinner layout
         patternSpinner.setAdapter(adapter); // Apply the adapter to the spinner
 
+
+        // ==================
         // themeSpinner
+        // ==================
         themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
         themeSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
         ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.theme_array, android.R.layout.simple_spinner_item);
         themeSpinner.setAdapter(adapter2);
 
+        // ==================
         // graphicSpinner
+        // ==================
         graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
         graphicSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
         ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_item);
@@ -249,6 +286,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         radius = 100;
         myView.setRadius(radius);
 
+        myView.setPatternString("Nothing");
+
         // Get a reference to a SensorManager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -275,6 +314,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // Spinner button listener
     // =================================================================================
 
+
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         // An item was selected. You can retrieve the selected item using
 
@@ -283,6 +323,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if(graphicString == "Circular"){
             Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
         }
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
 
     }
 

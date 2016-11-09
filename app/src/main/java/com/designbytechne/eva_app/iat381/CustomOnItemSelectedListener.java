@@ -16,16 +16,16 @@ import android.widget.Toast;
 
 public class CustomOnItemSelectedListener extends Activity implements OnItemSelectedListener {
 
-    CustomDrawableView mView;
     public static Spinner patternSpinner, graphicSpinner, themeSpinner;
     public static String selected;
+    CustomDrawableView mView;
 
     protected void onCreate(Bundle bundle){
         super.onCreate(bundle);
 
-
+        mView = new CustomDrawableView(getApplicationContext());
+        mView.setPatternString("Nothing");
         Canvas canvas = new Canvas();
-        mView = new CustomDrawableView(this);
         mView.draw(canvas);
         mView.invalidate();
 
@@ -46,19 +46,20 @@ public class CustomOnItemSelectedListener extends Activity implements OnItemSele
         selected = parent.getItemAtPosition(pos).toString();
 //        Toast.makeText(parent.getContext(), selected, Toast.LENGTH_SHORT).show();
 
-//        if(selected.equals("Circular")){
-//            Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
-//            mView.setPatternString("Circular");
-////             mView.setCircular(true);
-//        }
-//        else if(selected.equals("Square")){
-//            Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
-//            mView.setPatternString("Square");
-////            mView.setSquare(true);
-//        }
-//        else{
-//            Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
-//        }
+        if(selected.equals("Circular")){
+            Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
+            mView.setPatternString("Circular");
+//            mView.setCircular(true);
+        }
+        else if(selected.equals("Square")){
+            Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
+            mView.setPatternString("Square");
+//            mView.setSquare(true);
+        }
+        else{
+            Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
+//            mView.setPatternString("Nothing");
+        }
     }
 
     @Override

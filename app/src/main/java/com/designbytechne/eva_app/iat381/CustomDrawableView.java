@@ -26,10 +26,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-/**
- * Created by riceyu on 2016-11-01.
- */
-
 public class CustomDrawableView extends View{
 
     // Position and Acceleration values for drawing the shapes
@@ -43,7 +39,7 @@ public class CustomDrawableView extends View{
 
     public static boolean circular, square;
 
-    private String pattern;
+    private static String pattern;
     private static String patternString;
 
     private Paint p;
@@ -167,18 +163,18 @@ public class CustomDrawableView extends View{
         p.setColor(Color.rgb(getXPos(), getYPos(), 255));
 
         // Selecting what to draw
-        drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), 100 + getLevel()/3 );
-//        Toast.makeText(getContext(), "Pattern " + pattern, Toast.LENGTH_SHORT).show();
+//        drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), 100 + getLevel()/3 );
+        Toast.makeText(getContext(), "Pattern " + pattern, Toast.LENGTH_SHORT).show();
 
-//        if(pattern.equals("Circular")) {
-//            drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), getRadius() + getAccelY() / 2);
-//        }
-//        else if(pattern.equals("Square")){
-//            drawSquares(canvas, getXMid(), getYMid(), getRadius() + getAccelY()/2);
-//        }
-//        else{
-//            Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
-//        }
+        if(getPatternString().equals("Circular")) {
+            drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), getRadius() + getAccelY() / 2);
+        }
+        else if(getPatternString().equals("Square")){
+            drawSquares(canvas, getXMid(), getYMid(), getRadius() + getAccelY()/2);
+        }
+        else{
+            Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
+        }
 
 //        if(getCircular() == true ) {
 //            drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), getRadius() + getAccelY() / 2);
@@ -187,13 +183,13 @@ public class CustomDrawableView extends View{
 //            drawSquares(canvas, getXMid(), getYMid(), getRadius() + getAccelY()/2);
 //        }
 
-
         invalidate();
     }
 
     // ====================
     // Draws Cloud
     // ====================
+
     protected void drawCloud(Canvas canvas, int xMid, int yMid, int radius){
 
         if (radius <= 1) { return; }
