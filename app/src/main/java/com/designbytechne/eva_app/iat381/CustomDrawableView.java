@@ -167,21 +167,14 @@ public class CustomDrawableView extends View{
         Toast.makeText(getContext(), "Pattern " + pattern, Toast.LENGTH_SHORT).show();
 
         if(getPatternString().equals("Circular")) {
-            drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), getRadius() + getAccelY() / 2);
+            drawCloud(canvas, getXMid(), getYMid() + (getAccelY()/3), getRadius() + getLevel() / 2);
         }
         else if(getPatternString().equals("Square")){
-            drawSquares(canvas, getXMid(), getYMid(), getRadius() + getAccelY()/2);
+            drawSquares(canvas, getXMid(), getYMid() + (getAccelY()/3), getRadius()/4 + getLevel()/2);
         }
         else{
             Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
         }
-
-//        if(getCircular() == true ) {
-//            drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), getRadius() + getAccelY() / 2);
-//        }
-//        if(getSquare() == true){
-//            drawSquares(canvas, getXMid(), getYMid(), getRadius() + getAccelY()/2);
-//        }
 
         invalidate();
     }
@@ -191,9 +184,7 @@ public class CustomDrawableView extends View{
     // ====================
 
     protected void drawCloud(Canvas canvas, int xMid, int yMid, int radius){
-
         if (radius <= 1) { return; }
-
         canvas.drawCircle(xMid, yMid - radius, radius, p); // draw first circle
         drawCloud(canvas, xMid-radius-accelY, yMid+accelY, radius/2);  // draw circle to the left
         drawCloud(canvas, xMid+radius+accelY, yMid-accelY, radius/2);  // draw circle to the right

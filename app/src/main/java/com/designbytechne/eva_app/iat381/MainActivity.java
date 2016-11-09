@@ -51,7 +51,7 @@ import android.widget.VideoView;
 import java.io.DataOutputStream;
 
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
     VideoView vv;
 
@@ -152,22 +152,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Circular");
                 }
-
                 else if(selected.equals("Square")){
                     Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Square");
                 }
-
                 else{
                     Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Nothing");
                 }
             }
-
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item); // Create an ArrayAdapter using the string array and a default spinner layout
         patternSpinner.setAdapter(adapter); // Apply the adapter to the spinner
@@ -190,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         graphicSpinner.setAdapter(adapter3);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
+
 
         // ==============================================
         // Video
@@ -234,23 +230,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 try {
                     if (isChecked) {
-
-//                        try {Thread.sleep(1);}
-//                        catch (Exception e) {}
-
                         bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
                         audio = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
                         audio.startRecording();
-
                         Thread thread = new Thread(new Runnable() {
-                            public void run() {
-                                readAudioBuffer();
-                            }
+                            public void run() { readAudioBuffer();}
                         });
 
                         thread.setPriority(Thread.currentThread().getThreadGroup().getMaxPriority());
                         thread.start();
-
                         handler.removeCallbacks(update);
                         handler.postDelayed(update, 25);
 
@@ -260,10 +248,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         audio = null;
                         handler.removeCallbacks(update);
                     }
-                }catch (Exception e) {
+                } catch (Exception e) {
                     System.out.println("Audio Record failed");
                 }
-
             }
         });
 
@@ -306,51 +293,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 //        mp.start();
 //        createVisualizer();
 
-
     } // End of onCreate()
-
-
-    // =================================================================================
-    // Spinner button listener
-    // =================================================================================
-
-
-    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        // An item was selected. You can retrieve the selected item using
-
-        String graphicString = parent.getItemAtPosition(pos).toString();
-
-        if(graphicString == "Circular"){
-            Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
-
-    // get the selected dropdown list value
-    public void addListenerOnButton() {
-
-        patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
-        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
-        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
-        // btnSubmit = (Button) findViewById(R.id.btnSubmit);
-
-        patternSpinner.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                if( String.valueOf(patternSpinner.getSelectedItem()) == "Spiky"){
-                    // Toast.makeText(getApplication(), "Spiky Select", Toast.LENGTH_LONG).show();
-                }
-            }
-
-        });
-    }
 
     // =================================================================================
     // Audio Methods
@@ -398,7 +341,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
             myView.setLevel(updateLastlevel);
             levelTextView.setText("Level: " + lastLevel);
-
             handler.postAtTime(this, SystemClock.uptimeMillis() + 30);
         }
     };
@@ -448,7 +390,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if (id == R.id.videos) {
 //            Intent intent= new Intent(this, Videos.class);
 //            startActivity(intent);
-
             Intent intent = new Intent(this, Noise.class);
             startActivity(intent);
         }
@@ -590,55 +531,45 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 //    }
 
 
-    // ==================================================================================
-    // Custom View Class
-    // ==================================================================================
+    // =================================================================================
+    // Spinner button listener
+    // =================================================================================
 
-//    public static class CustomDrawableView extends View{
-//        static final int width = 50;
-//        static final int height = 50;
+//    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+//        // An item was selected. You can retrieve the selected item using
 //
-//        public CustomDrawableView(Context context){
-//            super(context);
-//            mDrawable = new ShapeDrawable(new OvalShape());
-//            mDrawable.getPaint().setColor(0xff74AC23);
-//            mDrawable.setBounds(accelX, accelY, accelX + width, accelY + height);
+//        String graphicString = parent.getItemAtPosition(pos).toString();
+//
+//        if(graphicString == "Circular"){
+//            Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
 //        }
+//    }
 //
-//        protected void onDraw(Canvas canvas) {
-//            super.onDraw(canvas);
-//            // Selecting what to draw
-////            Toast.makeText(getApplication(), "Volume: " + intensityInt, Toast.LENGTH_LONG).show();Toast.make
-//
-//            drawCloud(canvas, xMid, yMid+(accelY/3), radius + accelY/2);
-//            // drawCloud(canvas, xMid, yMid+(accelY/3), radius + accelY/2);
-//            // drawSquares(canvas, xMid, yMid, radius + accelY/2);
-//
-//            invalidate();
-//        }
-//
-//        // ====================
-//        // Draws Cloud
-//        // ====================
-//        protected void drawCloud(Canvas canvas, int xMid, int yMid, int radius){
-//
-//            if (radius <= 1) { return; }
-//            canvas.drawCircle(xMid, yMid - radius, radius, p); // draw first circle
-//            drawCloud(canvas, xMid-radius-accelX, yMid+accelY, radius/2);  // draw circle to the left
-//            drawCloud(canvas, xMid+radius+accelX, yMid-accelY, radius/2);  // draw circle to the right
-//        }
-//
-//        // ====================
-//        // Draws Squares
-//        // ====================
-//        protected void drawSquares(Canvas canvas, int xMid, int yMid, int radius){
-//
-//            if (radius <= 1) { return; }
-//            canvas.drawRect(xMid, yMid - radius, radius, radius + screenHeight/2, p); // draw first square
-//            drawSquares(canvas, xMid-radius, yMid, radius/2);  // draw square to the left
-//            drawSquares(canvas, xMid+radius, yMid, radius/2);  // draw square to the right
-//        }
+//    @Override
+//    public void onNothingSelected(AdapterView<?> parent) {
 //
 //    }
+//
+//    // get the selected dropdown list value
+//    public void addListenerOnButton() {
+//
+//        patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
+//        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
+//        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
+//        // btnSubmit = (Button) findViewById(R.id.btnSubmit);
+//
+//        patternSpinner.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View v) {
+//
+//                if( String.valueOf(patternSpinner.getSelectedItem()) == "Spiky"){
+//                    // Toast.makeText(getApplication(), "Spiky Select", Toast.LENGTH_LONG).show();
+//                }
+//            }
+//
+//        });
+//    }
+
 
 }

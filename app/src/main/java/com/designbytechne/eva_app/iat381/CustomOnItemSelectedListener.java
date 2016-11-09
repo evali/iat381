@@ -49,12 +49,10 @@ public class CustomOnItemSelectedListener extends Activity implements OnItemSele
         if(selected.equals("Circular")){
             Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
             mView.setPatternString("Circular");
-//            mView.setCircular(true);
         }
         else if(selected.equals("Square")){
             Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
             mView.setPatternString("Square");
-//            mView.setSquare(true);
         }
         else{
             Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
