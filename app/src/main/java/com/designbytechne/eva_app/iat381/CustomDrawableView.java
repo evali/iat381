@@ -41,8 +41,8 @@ public class CustomDrawableView extends View{
 
     public static boolean circular, square;
 
-    private static String pattern, theme;
-    private static String patternString, themeString;
+    private static String pattern, theme, graphic;
+    private static String patternString, themeString, graphicString;
 
     private Paint p;
 
@@ -63,6 +63,7 @@ public class CustomDrawableView extends View{
 
         pattern = getPatternString();
         theme = getThemeString();
+        graphic = getGraphicString();
 
 //         p = new Paint();
 //         p.setColor(Color.WHITE);
@@ -109,6 +110,7 @@ public class CustomDrawableView extends View{
 
     public void setPatternString(String s){this.patternString = s;}
     public void setThemeString(String s){this.themeString = s;}
+    public void setGraphicString(String s){this.graphicString = s;}
 
 
     // ==================================================================================
@@ -154,6 +156,7 @@ public class CustomDrawableView extends View{
 
     public String getPatternString() {return this.patternString; }
     public String getThemeString() {return this.themeString; }
+    public String getGraphicString() {return this.graphicString; }
 
 
     // ==================================================================================
@@ -170,11 +173,11 @@ public class CustomDrawableView extends View{
 //        Selecting color based on theme
         if(getThemeString().equals("Bright")){
             p.setColor(Color.rgb(getXPos(), getYPos(), 255));
-            Toast.makeText(getContext(), "Theme is bright", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "Theme is bright", Toast.LENGTH_SHORT).show();
         }
         else if(getThemeString().equals("Dark")) {
             p.setColor(Color.rgb(getXPos() + getYPos(), getXPos() + getYPos(), getXPos() + getYPos()));
-            Toast.makeText(getContext(), "Theme is Dark", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "Theme is Dark", Toast.LENGTH_SHORT).show();
         }
         else if(getThemeString().equals("Colorful")){
             Random rand = new Random();
@@ -182,7 +185,7 @@ public class CustomDrawableView extends View{
             int g = rand.nextInt(255);
             int b = rand.nextInt(255);
             p.setColor(Color.rgb(r,g,b));
-            Toast.makeText(getContext(), "Theme is Colorful", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "Theme is Colorful", Toast.LENGTH_SHORT).show();
 
         }
         // Selecting what to draw
@@ -196,11 +199,17 @@ public class CustomDrawableView extends View{
             drawSquares(canvas, getXMid(), getYMid() + (getAccelY()/3), getRadius()/4 + getLevel()/2);
         }
         else{
-            Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
         }
 
         invalidate();
+
+        drawRandom(canvas);
+
     }
+
+    //Selecting effect
+
 
     // ====================
     // Draws Cloud
@@ -223,4 +232,19 @@ public class CustomDrawableView extends View{
         drawSquares(canvas, xMid+radius, yMid, radius/2);  // draw square to the right
     }
 
+    // ====================
+    // Draws Squares
+    // ====================
+    protected void drawRandom(Canvas canvas){
+        if (radius <= 1) { return; }
+        Random rand = new Random();
+        int n = rand.nextInt(10);
+        for (int i=0;i<n;i++ ){
+            int r = rand.nextInt(50);
+            int x = rand.nextInt(1200);
+            int y = rand.nextInt(1940);
+            canvas.drawCircle(x, y, r, p); // draw first circle
+        }
+
+    }
 }

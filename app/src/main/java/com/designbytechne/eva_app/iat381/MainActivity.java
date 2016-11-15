@@ -193,17 +193,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 selected = parent.getItemAtPosition(position).toString();
 
                 if(selected.equals("Circular")){
-                    Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Circular");
                     selectedPattern = "Circular";
                 }
                 else if(selected.equals("Square")){
-                    Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Square");
                     selectedPattern = "Sqaure";
                 }
                 else{
-                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Nothing");
                     selectedPattern = "Nothing";
                 }
@@ -225,20 +225,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 selected = parent.getItemAtPosition(position).toString();
 
                 if(selected.equals("Dark")){
-                    Toast.makeText(parent.getContext(), "Dark True", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(parent.getContext(), "Dark True", Toast.LENGTH_SHORT).show();
                     myView.setThemeString("Dark");
                     selectedTheme = "Dark";
                 }
                 else if(selected.equals("Colorful")){
-                    Toast.makeText(parent.getContext(), "Colorful True", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(parent.getContext(), "Colorful True", Toast.LENGTH_SHORT).show();
                     myView.setThemeString("Colorful");
                     selectedTheme = "Colorful";
                 }
-//                else if(selected.equals("Colorful")){
+                else if(selected.equals("Colorful")){
 //                    Toast.makeText(parent.getContext(), "Colorful True", Toast.LENGTH_SHORT).show();
-//                    myView.setThemeString("Colorful");
-//                    selectedTheme = "Bright";
-//                }
+                    myView.setThemeString("Colorful");
+                    selectedTheme = "Colorful";
+                }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
@@ -250,7 +250,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // graphicSpinner
         // ==================
         graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
-        graphicSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+        graphicSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selected = parent.getItemAtPosition(position).toString();
+
+                if(selected.equals("Gravity")){
+//                    Toast.makeText(parent.getContext(), "Dark True", Toast.LENGTH_SHORT).show();
+                    myView.setThemeString("Gravity");
+                    selectedGraphic = "Gravity";
+                }
+
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
         ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_item);
         graphicSpinner.setAdapter(adapter3);
 
@@ -386,7 +400,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // =================================================================================
     public void addTheme(){
         String pattern = selectedPattern;
-        String graphic = "flower";
+        String graphic = selectedGraphic;
         String theme = selectedTheme;
         String themeName = editTextThemeName.getText().toString();
 
