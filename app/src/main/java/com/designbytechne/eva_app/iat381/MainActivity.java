@@ -49,6 +49,8 @@ import android.widget.VideoView;
 
 import java.io.DataOutputStream;
 
+import static com.designbytechne.eva_app.iat381.CustomOnItemSelectedListener.selected;
+
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
 
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Visualizer audioOutput = null;
 
     private Spinner patternSpinner, themeSpinner, graphicSpinner;
+    String selectedPattern, selectedTheme, selectedGraphic;
 
     private GestureDetectorCompat gestureDetect;
     private TextView accelXTextView, levelTextView;
@@ -113,8 +116,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         Canvas canvas = new Canvas();
         myView = new CustomDrawableView(this);
+        myView.setPatternString("Nothing");
+        myView.setThemeString("Nothing");
         myView.draw(canvas);
         myView.invalidate();
+
+
+
+
 
         accelXTextView = (TextView) findViewById(R.id.accelXTextView);
         levelTextView = (TextView) findViewById((R.id.levelTextView));
@@ -153,25 +162,106 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // ==============================================
         moveToggleButton = (ToggleButton) findViewById(R.id.moveToggleButton);
 
-        // patternSpinner
+//        // patternSpinner
+//        patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
+//        patternSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item); // Create an ArrayAdapter using the string array and a default spinner layout
+//        patternSpinner.setAdapter(adapter); // Apply the adapter to the spinner
+//
+//        // themeSpinner
+//        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
+//        themeSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+//        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.theme_array, android.R.layout.simple_spinner_item);
+//        themeSpinner.setAdapter(adapter2);
+//
+//        // graphicSpinner
+//        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
+//        graphicSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+//        ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_item);
+//        graphicSpinner.setAdapter(adapter3);
+//
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
+
+
+        // ==================
+        // Pattern Spinner
+        // ==================
         patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
-        patternSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+        patternSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selected = parent.getItemAtPosition(position).toString();
+
+                if(selected.equals("Circular")){
+                    Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
+                    myView.setPatternString("Circular");
+                    selectedPattern = "Circular";
+                }
+                else if(selected.equals("Square")){
+                    Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
+                    myView.setPatternString("Square");
+                    selectedPattern = "Sqaure";
+                }
+                else{
+                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
+                    myView.setPatternString("Nothing");
+                    selectedPattern = "Nothing";
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item); // Create an ArrayAdapter using the string array and a default spinner layout
         patternSpinner.setAdapter(adapter); // Apply the adapter to the spinner
 
+
+        // ==================
         // themeSpinner
+        // ==================
         themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
-        themeSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+        themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selected = parent.getItemAtPosition(position).toString();
+
+                if(selected.equals("Dark")){
+                    Toast.makeText(parent.getContext(), "Dark True", Toast.LENGTH_SHORT).show();
+                    myView.setThemeString("Dark");
+                    selectedTheme = "Dark";
+                }
+                else if(selected.equals("Colorful")){
+                    Toast.makeText(parent.getContext(), "Colorful True", Toast.LENGTH_SHORT).show();
+                    myView.setThemeString("Colorful");
+                    selectedTheme = "Colorful";
+                }
+//                else if(selected.equals("Colorful")){
+//                    Toast.makeText(parent.getContext(), "Colorful True", Toast.LENGTH_SHORT).show();
+//                    myView.setThemeString("Colorful");
+//                    selectedTheme = "Bright";
+//                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
         ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.theme_array, android.R.layout.simple_spinner_item);
         themeSpinner.setAdapter(adapter2);
 
+        // ==================
         // graphicSpinner
+        // ==================
         graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
         graphicSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
         ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_item);
         graphicSpinner.setAdapter(adapter3);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
+
+
+
+
+
+
+
 
         // ==============================================
         // Video
@@ -267,6 +357,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         radius = 100;
         myView.setRadius(radius);
+        myView.setPatternString("Nothing");
 
         // Get a reference to a SensorManager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -294,9 +385,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // Saving theme - floating button
     // =================================================================================
     public void addTheme(){
-        String pattern = "circular";
+        String pattern = selectedPattern;
         String graphic = "flower";
-        String theme = "Dark";
+        String theme = selectedTheme;
         String themeName = editTextThemeName.getText().toString();
 
 
@@ -317,37 +408,37 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // Spinner button listener
     // =================================================================================
 
-    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        // An item was selected. You can retrieve the selected item using
-
-        String graphicString = parent.getItemAtPosition(pos).toString();
-
-        if(graphicString == "Circular"){
-            Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    // get the selected dropdown list value
-    public void addListenerOnButton() {
-
-        patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
-        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
-        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
-        // btnSubmit = (Button) findViewById(R.id.btnSubmit);
-
-        patternSpinner.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                if( String.valueOf(patternSpinner.getSelectedItem()) == "Spiky"){
-                    // Toast.makeText(getApplication(), "Spiky Select", Toast.LENGTH_LONG).show();
-                }
-            }
-
-        });
-    }
+//    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+//        // An item was selected. You can retrieve the selected item using
+//
+//        String graphicString = parent.getItemAtPosition(pos).toString();
+//
+//        if(graphicString == "Circular"){
+//            Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
+//        }
+//
+//    }
+//
+//    // get the selected dropdown list value
+//    public void addListenerOnButton() {
+//
+//        patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
+//        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
+//        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
+//        // btnSubmit = (Button) findViewById(R.id.btnSubmit);
+//
+//        patternSpinner.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View v) {
+//
+//                if( String.valueOf(patternSpinner.getSelectedItem()) == "Spiky"){
+//                    // Toast.makeText(getApplication(), "Spiky Select", Toast.LENGTH_LONG).show();
+//                }
+//            }
+//
+//        });
+//    }
 
     // =================================================================================
     // Audio Methods
