@@ -2,6 +2,7 @@ package com.designbytechne.eva_app.iat381;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -105,6 +106,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     MyDatabase db;
     EditText editTextThemeName;
 
+    //sharedPreference
+    String DEFAULT = "not available";
+
 
     // =================================================================================
     // onCreate Method
@@ -188,9 +192,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // ==================
         patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
         patternSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+
+
+
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selected = parent.getItemAtPosition(position).toString();
+                saveSharedPreferences();
 
                 if(selected.equals("Circular")){
 //                    Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
@@ -210,6 +219,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
+
+
+
         });
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item); // Create an ArrayAdapter using the string array and a default spinner layout
         patternSpinner.setAdapter(adapter); // Apply the adapter to the spinner
@@ -223,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selected = parent.getItemAtPosition(position).toString();
+                saveSharedPreferences();
 
                 if(selected.equals("Dark")){
 //                    Toast.makeText(parent.getContext(), "Dark True", Toast.LENGTH_SHORT).show();
@@ -254,6 +267,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selected = parent.getItemAtPosition(position).toString();
+                saveSharedPreferences();
+
 
                 if(selected.equals("Gravity")){
 //                    Toast.makeText(parent.getContext(), "Dark True", Toast.LENGTH_SHORT).show();
@@ -392,8 +407,71 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //        createVisualizer();
 
 
+
+
+        // ==============================================
+        // sharedPreferences - save last setting
+        // ==============================================
+
+//        selectedPattern = "circular";
+//        selectedTheme = "Dark";
+//        selectedGraphic = "null";
+
+//
+//        String pattern = sharedPrefs.getString("pattern", DEFAULT);
+//        String graphic = sharedPrefs.getString("graphic", DEFAULT);
+//        String theme = sharedPrefs.getString("theme", DEFAULT);
+
+//        if (!pattern.equals("null")|| !graphic.equals("null")|| !theme.equals("null"))
+//        {
+//            Toast.makeText(this, "Weclome back, loading saved preferences", Toast.LENGTH_LONG).show();
+//            selectedPattern = pattern;
+//            selectedGraphic = graphic;
+//            selectedTheme = theme;
+//        }
+//        else {
+//            //user data does not exist
+//            Toast.makeText(this, "No preference", Toast.LENGTH_LONG).show();
+//
+//        }
+
     } // End of onCreate()
 
+
+
+    void  saveSharedPreferences(){
+
+        //save the spinner items
+
+        SharedPreferences sharedPrefs = getSharedPreferences("MySetting", Context.MODE_PRIVATE);
+        int patternSelectedPosition = patternSpinner.getSelectedItemPosition();
+        int graphicSelectedPosition = graphicSpinner.getSelectedItemPosition();
+        int themeSelectedPosition = themeSpinner.getSelectedItemPosition();
+
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putInt("patternSpinnerSelection", patternSelectedPosition);
+        editor.putInt("graphicSpinnerSelection", graphicSelectedPosition);
+        editor.putInt("themeSpinnerSelection", themeSelectedPosition);
+
+        editor.commit();
+
+//        patternSpinner.setSelection(sharedPrefs.getInt("spinnerSelection",0));
+        // Call the callback
+//        saveSharedPreferences();
+    }
+
+
+    void sharePreferencesSpinner(){
+
+        SharedPreferences sharedPrefs = getSharedPreferences("MySetting", Context.MODE_PRIVATE);
+//        Toast.makeText(this, "get preference "+sharedPrefs.getInt("spinnerSelection",0), Toast.LENGTH_LONG).show();
+
+        patternSpinner.setSelection(sharedPrefs.getInt("patternSpinnerSelection",0));
+        graphicSpinner.setSelection(sharedPrefs.getInt("graphicSpinnerSelection",0));
+        themeSpinner.setSelection(sharedPrefs.getInt("themeSpinnerSelection",0));
+
+
+    }
 
     // =================================================================================
     // Saving theme - floating button
@@ -489,6 +567,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
+        SharedPreferences sharedPrefs = getSharedPreferences("MySetting", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString("pattern", selectedPattern);
+        editor.putString("graphic", selectedGraphic);
+        editor.putString("theme", selectedTheme);
+        Toast.makeText(this, "Preferences saved "+selectedGraphic+selectedPattern+selectedTheme, Toast.LENGTH_LONG).show();
+        editor.commit();
     }
 
     public Runnable update = new Runnable() {
@@ -516,6 +603,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //save current counter value in bundle key - value
         outState.putInt("LEVEL_VALUE", lastLevel);
+        saveSharedPreferences();
     }
 
     @Override
@@ -525,6 +613,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //retrieve current counter value from bundle based on key
         lastLevel = savedInstanceState.getInt("LEVEL_VALUE");
+        sharePreferencesSpinner();
     }
 
     @Override
@@ -591,6 +680,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Register this class as a listener for the accelerometer sensor
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_GAME);
+
+        sharePreferencesSpinner();
     }
 
     @Override
