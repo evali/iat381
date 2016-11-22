@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GestureDetectorCompat;
@@ -37,6 +38,10 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
@@ -49,6 +54,7 @@ import android.widget.ToggleButton;
 import android.widget.VideoView;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
@@ -56,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     VideoView vv;
 
     ToggleButton moveToggleButton;
+
+    static final int PICK_AUDIO_REQUEST = 1;
 
     public static final int sampleRate = 11025;
     public static final int bufferSizeFactor = 10;
@@ -85,15 +93,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor Accelerometer;
     private SensorManager sensorManager = null;
 
+    // Media Player and Visualizer
     private MediaPlayer mp;
+    private MediaRecorder mRecorder;
     private AudioManager am;
+    private int volLevel;
     private Visualizer audioOutput = null;
+    private float intensity = 0;
+    private int intensityInt;
+    private int dbValue;
 
-    private Spinner patternSpinner, themeSpinner, graphicSpinner;
+    private Spinner patternSpinner, motionSpinner, graphicSpinner;
 
     private GestureDetectorCompat gestureDetect;
     private TextView accelXTextView, levelTextView;
-    public static String selected;
+    public static String selectPattern, selectMotion;
 
     private static final String TAG = "MyActivity";
 
@@ -112,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Canvas canvas = new Canvas();
         myView = new CustomDrawableView(this);
         myView.setPatternString("Nothing");
+        myView.setMotionString("Nothing");
         myView.draw(canvas);
         myView.invalidate();
 
@@ -121,9 +136,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT); // 2 pixels height
         ((LinearLayout) findViewById(R.id.topLinearLayout)).addView(new CustomDrawableView(this), params);
 
-        // ==============================================
+        // =========================
         // Dropdown Menu (Spinner)
-        // ==============================================
+        // =========================
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -146,18 +161,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         patternSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selected = parent.getItemAtPosition(position).toString();
+                selectPattern = parent.getItemAtPosition(position).toString();
 
-                if(selected.equals("Circular")){
-                    Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
+                if(selectPattern.equals("Circular")){
+//                    Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Circular");
                 }
-                else if(selected.equals("Square")){
-                    Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
+                else if(selectPattern.equals("Square")){
+//                    Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Square");
                 }
+                else if(selectPattern.equals("Spiky")){
+//                    Toast.makeText(parent.getContext(), "Spiky True", Toast.LENGTH_SHORT).show();
+                    myView.setPatternString("Spiky");
+                }
                 else{
-                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Nothing");
                 }
             }
@@ -167,29 +186,49 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item); // Create an ArrayAdapter using the string array and a default spinner layout
         patternSpinner.setAdapter(adapter); // Apply the adapter to the spinner
 
+        // ==================
+        // motionSpinner
+        // ==================
+        motionSpinner = (Spinner) findViewById(R.id.motionSpinner);
+        motionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectMotion = parent.getItemAtPosition(position).toString();
 
-        // ==================
-        // themeSpinner
-        // ==================
-        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
-        themeSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
-        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.theme_array, android.R.layout.simple_spinner_item);
-        themeSpinner.setAdapter(adapter2);
+                if(selectMotion.equals("Static")){
+//                    Toast.makeText(parent.getContext(), "Static True", Toast.LENGTH_SHORT).show();
+                    myView.setMotionString("Static");
+                }
+                else if(selectMotion.equals("Wobble")){
+//                    Toast.makeText(parent.getContext(), "Wobble True", Toast.LENGTH_SHORT).show();
+                    myView.setMotionString("Wobble");
+                }
+                else if(selectMotion.equals("Bounce")){
+                    myView.setMotionString("Bounce");
+                }
+                else{
+//                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
+                    myView.setMotionString("Nothing");
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.motion_array, android.R.layout.simple_spinner_dropdown_item);
+        motionSpinner.setAdapter(adapter2);
 
         // ==================
         // graphicSpinner
         // ==================
         graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
         graphicSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
-        ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_dropdown_item);
         graphicSpinner.setAdapter(adapter3);
-
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
 
-
-        // ==============================================
+        // =========
         // Video
-        // ==============================================
+        // =========
 
         //loop video
         vv = (VideoView) findViewById(R.id.videoView01);
@@ -207,9 +246,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         vv.requestFocus();
 //      vv.start();
 
-        // ==============================================
+
+        // ==================
+        // Media Player
+        // ==================
+        mp = new MediaPlayer();
+//        mp = MediaPlayer.create(getApplicationContext(),R.raw.hello);
+        AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+
+        // ==================
         // Audio Detection
-        // ==============================================
+        // ==================
 
         level = (ProgressBar) findViewById(R.id.progressbar_level);
         level.setMax(32676);
@@ -232,21 +280,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     if (isChecked) {
                         bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
                         audio = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+
+                        // Begin new intent and get audio file
+                        Intent mediaIntent = new Intent(Intent.ACTION_PICK);
+                        mediaIntent.setType("audio/*"); //set mime type as per requirement
+                        mediaIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                        startActivityForResult(mediaIntent, PICK_AUDIO_REQUEST);
+
                         audio.startRecording();
                         Thread thread = new Thread(new Runnable() {
                             public void run() { readAudioBuffer();}
                         });
+//                        createVisualizer();
+//                        mp.start();
 
                         thread.setPriority(Thread.currentThread().getThreadGroup().getMaxPriority());
                         thread.start();
                         handler.removeCallbacks(update);
-                        handler.postDelayed(update, 25);
+                        handler.postDelayed(update, 100);
 
                     } else if (audio != null) {
                         audio.stop();
                         audio.release();
                         audio = null;
                         handler.removeCallbacks(update);
+                        mp.stop();
+
                     }
                 } catch (Exception e) {
                     System.out.println("Audio Record failed");
@@ -254,9 +313,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-        // ==============================================
+        // ===============================
         // CustomDrawableView objects
-        // ==============================================
+        // ===============================
 
         // Get width and height of screen
         Display display = getWindowManager().getDefaultDisplay();
@@ -274,6 +333,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         myView.setRadius(radius);
 
         myView.setPatternString("Nothing");
+        myView.setMotionString("Nothing");
 
         // Get a reference to a SensorManager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -286,14 +346,48 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         gestureDetect = new GestureDetectorCompat(this, this);
         gestureDetect.setOnDoubleTapListener(this);
 
-        // Create new Media Player
-//        mp = MediaPlayer.create(getApplicationContext(),R.raw.shift);
-//        AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
-//        volLevel= am.getStreamVolume(AudioManager.STREAM_MUSIC);
-//        mp.start();
-//        createVisualizer();
-
     } // End of onCreate()
+
+
+    // =================================================================================
+    // On Activity Result
+    // =================================================================================
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_AUDIO_REQUEST && resultCode == Activity.RESULT_OK) {
+            Uri audioUri = data.getData();
+            Log.d("", "Video URI= " + audioUri);
+            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+            try {
+                mp.setDataSource(getApplicationContext(), audioUri);
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
+            } catch (SecurityException e) {
+                Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
+            } catch (IllegalStateException e) {
+                Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                mp.prepare();
+            } catch (IllegalStateException e) {
+                Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
+            }
+//            mp = MediaPlayer.create(getApplicationContext(), audioUri);
+
+            createVisualizer();
+            mp.start();
+        }
+    }
+
 
     // =================================================================================
     // Audio Methods
@@ -307,17 +401,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             do {
                 bufferReadResult = audio.read(buffer, 0, bufferSize);
-
                 double sum = 0;
-
                 for (int i = 0; i < bufferReadResult; i++){
 //                    output.writeShort(buffer [i]);
-//                    sum += buffer [i] * buffer [i];
+                    sum += buffer[i];
+//                   sum += buffer [i] * buffer [i];
 
-                    if (buffer[i] > lastLevel) {
-                        lastLevel = buffer[i];
-                    }
+                    if (buffer[i] > lastLevel) {lastLevel = buffer[i];}
                 }
+                lastLevel = (int) Math.abs((sum / bufferReadResult));
 
             } while (bufferReadResult > 0 && audio.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING);
 
@@ -327,21 +419,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 handler.removeCallbacks(update);
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     public Runnable update = new Runnable() {
 
         public void run() {
             MainActivity.this.level.setProgress(lastLevel);
-            lastLevel *= .04;
-            int updateLastlevel = (int) Math.round(lastLevel * .2);
+//            lastLevel *= .01;
+            int updateLastlevel = (int) Math.round(lastLevel) * 2;
+//            int updateLastlevel = (int) Math.round(lastLevel);
 
-            myView.setLevel(updateLastlevel);
-            levelTextView.setText("Level: " + lastLevel);
-            handler.postAtTime(this, SystemClock.uptimeMillis() + 30);
+//            myView.setLevel(updateLastlevel);
+//            levelTextView.setText("Level: " + lastLevel);
+            handler.postAtTime(this, SystemClock.uptimeMillis() + 0);
         }
     };
 
@@ -451,8 +542,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         myView.setYPos(this.yPos);
 
         this.gestureDetect.onTouchEvent(e);
-//        Toast toast = Toast.makeText(getApplication(), "Touched screen", Toast.LENGTH_LONG);
-//        toast.show();
         return super.onTouchEvent(e);
     }
 
@@ -480,8 +569,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-    public void onLongPress(MotionEvent e) {
-    }
+    public void onLongPress(MotionEvent e) { }
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -503,32 +591,55 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         return false;
     }
 
+
     // ==================================================================================
     // Audio Visualizer
     // ==================================================================================
 
-//    private void createVisualizer(){
-//        int rate = Visualizer.getMaxCaptureRate();
-//        int audio = mp.getAudioSessionId();
-//
-//        audioOutput = new Visualizer(audio); // get output audio stream
-//        audioOutput.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
-//
-//            @Override
-//            public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
-//                intensity = ((float) waveform[0] + 128f) / 256;
-//                intensityInt = (int)intensity;
-//                Log.d("vis", String.valueOf(intensity));
-//            }
-//
-//            @Override
-//            public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
-//
-//            }
-//        },rate , true, false); // waveform not freq data
+    private void createVisualizer(){
+        int rate = Visualizer.getMaxCaptureRate();
+        int audio = mp.getAudioSessionId();
+
+        audioOutput = new Visualizer(audio); // get output audio stream
+        audioOutput.setCaptureSize(Visualizer.getCaptureSizeRange()[0]);
+        Visualizer.OnDataCaptureListener captureListener = new Visualizer.OnDataCaptureListener()
+        {
+            @Override
+            public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) {
+//                intensity = ((float) bytes[0] + 128f);
+//                intensityInt = Math.round(intensity);
+//                levelTextView.setText("Intensity: " + intensityInt);
+//                myView.setLevel(intensityInt);
+            }
+
+            @Override
+            public void onFftDataCapture(Visualizer visualizer, final byte[] bytes, int samplingRate) {
+                for (int i = 0; i < bytes.length / 2; i++) {
+
+                    byte rfk = bytes[2 * i];
+                    byte ifk = bytes[2 * i + 1];
+                    float magnitude = (float) (Math.sqrt(rfk * rfk) + Math.sqrt(ifk * ifk));
+                    dbValue = (int) (20 * Math.log10(magnitude/32767));
+                }
+
+//                levelTextView.setText("Db : " + dbValue);
+//                myView.setLevel(dbValue);
+
+                int freq = Math.abs(bytes[0] );
+                levelTextView.setText("Freq : " + freq);
+                myView.setLevel(freq);
+                myView.setStroke(freq);
+            }
+        };
+
+//        audioOutput.setDataCaptureListener(captureListener, Visualizer.getMaxCaptureRate(), false, true);
+        audioOutput.setDataCaptureListener(captureListener, 20000, false, true);
+        audioOutput.setEnabled(true);
+
 //        Log.d("rate", String.valueOf(Visualizer.getMaxCaptureRate()));
-//        audioOutput.setEnabled(true);
-//    }
+    }
+
+
 
 
     // =================================================================================

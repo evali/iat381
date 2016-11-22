@@ -30,8 +30,8 @@ public class CustomOnItemSelectedListener extends Activity implements OnItemSele
         mView.invalidate();
 
         patternSpinner = (Spinner)findViewById(R.id.patternSpinner);
+        themeSpinner = (Spinner)findViewById(R.id.motionSpinner);
         graphicSpinner = (Spinner)findViewById(R.id.graphicSpinner);
-        themeSpinner = (Spinner)findViewById(R.id.themeSpinner);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item);
         // Specify the layout to use when the list of choices appears

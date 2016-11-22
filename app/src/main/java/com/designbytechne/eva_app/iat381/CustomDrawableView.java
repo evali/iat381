@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
@@ -31,18 +32,23 @@ public class CustomDrawableView extends View{
     // Position and Acceleration values for drawing the shapes
     private static int accelX;
     private static int accelY;
-    private static int xMid, yMid, xPos, yPos;
+    private static int xMid, yMid, xPos, yPos, dx, dy, getXMid, getYMid, xMove, yMove, gravityX, gravityY;
     private static int screenWidth, screenHeight;
     private static int radius;
 
     private static int level;
+    private static int stroke;
 
     public static boolean circular, square;
 
     private static String pattern;
     private static String patternString;
+    private static String motion;
+    private static String motionString;
 
     private Paint p;
+    private int paintAlpha = 255;
+    private Point a, b, c;
 
     static ShapeDrawable mDrawable = new ShapeDrawable();
 
@@ -60,6 +66,10 @@ public class CustomDrawableView extends View{
         mDrawable.setBounds(accelX, accelY, accelX + screenWidth, accelY + screenHeight);
 
         pattern = getPatternString();
+
+        xMove = 325;
+        dx = 1;
+        dy = 10;
 
 //         p = new Paint();
 //         p.setColor(Color.WHITE);
@@ -100,11 +110,13 @@ public class CustomDrawableView extends View{
     public void setPaint(Paint paint) {this.p = paint;}
 
     public void setLevel(int level) {this.level = level;}
+    public void setStroke(int stroke) {this.stroke = stroke;}
 
     public void setCircular(Boolean b) {this.circular = b; }
     public void setSquare(Boolean b) {this.square = b; }
 
     public void setPatternString(String s){this.patternString = s;}
+    public void setMotionString(String s){this.motionString = s;}
 
 
     // ==================================================================================
@@ -144,11 +156,13 @@ public class CustomDrawableView extends View{
     }
 
     public int getLevel() {return this.level; }
+    public int getStroke() {return this.stroke; }
 
     public boolean getCircular() { return this.circular; }
     public boolean getSquare() { return this.square; }
 
     public String getPatternString() {return this.patternString; }
+    public String getMotionString() {return this.motionString; }
 
 
     // ==================================================================================
@@ -160,20 +174,65 @@ public class CustomDrawableView extends View{
 
         // Setting paint colour
         p = new Paint();
-        p.setColor(Color.rgb(getXPos(), getYPos(), 255));
+        p.setStyle(Paint.Style.STROKE);
+        p.setColor(Color.rgb(getXPos(), getLevel() * 2, 255));
+        p.setAlpha(paintAlpha);
+        p.setStrokeWidth(getStroke()/3);
 
-        // Selecting what to draw
-//        drawCloud(canvas, getXMid(), getYMid() + (getAccelY() / 3), 100 + getLevel()/3 );
-        Toast.makeText(getContext(), "Pattern " + pattern, Toast.LENGTH_SHORT).show();
+        getXMid = getXMid();
+        getYMid = getYMid() - getRadius()*2;
 
-        if(getPatternString().equals("Circular")) {
-            drawCloud(canvas, getXMid(), getYMid() + (getAccelY()/3), getRadius() + getLevel() / 2);
+        gravityX = (int) 0.1;
+        gravityY = (int) 0.5;
+
+        int getLevel = getLevel();
+
+        // Drawing triangle
+        a = new Point(0, 0);
+        b = new Point(0, 100);
+        c = new Point(87, 50);
+
+        // ========================
+        // Selecting Movement
+        // ========================
+
+        if(getMotionString().equals("Static")) {
+            // Do Nothing
         }
-        else if(getPatternString().equals("Square")){
-            drawSquares(canvas, getXMid(), getYMid() + (getAccelY()/3), getRadius()/4 + getLevel()/2);
+        else if(getMotionString().equals("Wobble")){
+            xMove += dx;
+
+            if(xMove <= 0){dx = -(dx);}
+            if(xMove >= 600){dx = -(dx);}
+        }
+        else if(getMotionString().equals("Bounce")){
+            xMove += dx;
+
+            if(xMove <= 0){dx = -(dx);}
+            if(xMove >= 600){dx = -(dx);}
+
+            yPos = (int) Math.round(120 * Math.sin(Math.toDegrees(xMove/5)));
         }
         else{
-            Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "No Motion", Toast.LENGTH_SHORT).show();
+        }
+
+        // ========================
+        // Selecting Pattern
+        // ========================
+        // Toast.makeText(getContext(), "Pattern " + pattern, Toast.LENGTH_SHORT).show();
+
+        if(getPatternString().equals("Circular")) {
+            drawCloud(canvas, xMove, getYMid + (getAccelX()/3), getRadius() + getLevel()/8);
+        }
+        else if(getPatternString().equals("Square")){
+            drawSquares(canvas, xMove, getYMid + (getAccelX()/3), getRadius()/2 + getLevel()/2);
+        }
+        else if(getPatternString().equals("Spiky")){
+            drawSpikes(canvas, xMove, getYMid + (getAccelX()/3), getRadius() + getLevel()/2);
+        }
+        else{
+//            Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
         }
 
         invalidate();
@@ -185,9 +244,20 @@ public class CustomDrawableView extends View{
 
     protected void drawCloud(Canvas canvas, int xMid, int yMid, int radius){
         if (radius <= 1) { return; }
-        canvas.drawCircle(xMid, yMid - radius, radius, p); // draw first circle
-        drawCloud(canvas, xMid-radius-accelY, yMid+accelY, radius/2);  // draw circle to the left
-        drawCloud(canvas, xMid+radius+accelY, yMid-accelY, radius/2);  // draw circle to the right
+//        paintAlpha = radius/6;
+        canvas.drawCircle(xMid , yMid, radius, p); // draw first circle
+
+        drawCloud(canvas, xMid-getLevel(), yMid+getLevel() + yPos/8, radius/3);  // draw circle to the left
+        drawCloud(canvas, xMid+getLevel(), yMid-getLevel() + yPos/8, radius/3);
+        drawCloud(canvas, xMid-getLevel()+ yPos/8, yMid-getLevel(), radius/3);
+        drawCloud(canvas, xMid+getLevel()+ yPos/8, yMid+getLevel(), radius/3);
+
+//       ========================
+
+//        drawCloud(canvas, xMid-radius-accelY, yMid+radius+accelY, radius/3);  // draw circle to the left
+//        drawCloud(canvas, xMid+radius+accelY, yMid-radius-accelY, radius/3);  // draw circle to the right
+//        drawCloud(canvas, xMid-radius-accelY, yMid-radius-accelY, radius/3);  // draw circle to the left
+//        drawCloud(canvas, xMid+radius+accelY, yMid+radius+accelY, radius/3);  // draw circle to the right
     }
 
     // ====================
@@ -195,9 +265,28 @@ public class CustomDrawableView extends View{
     // ====================
     protected void drawSquares(Canvas canvas, int xMid, int yMid, int radius){
         if (radius <= 1) { return; }
-        canvas.drawRect(xMid, yMid - radius, radius, radius + screenHeight/2, p); // draw first square
-        drawSquares(canvas, xMid-radius, yMid, radius/2);  // draw square to the left
-        drawSquares(canvas, xMid+radius, yMid, radius/2);  // draw square to the right
+//        paintAlpha = radius/2;
+        canvas.drawRect(xMid - radius*3, yMid - radius*3, xMid + radius*3, yMid + radius*3, p); // draw first square
+//        canvas.drawRect(xMid, yMid + radius, radius, radius + screenHeight/2, p); // draw first square
+        drawSquares(canvas, xMid-(accelX/3), yMid+(accelX/6), radius/2);  // draw square to the left
+        drawSquares(canvas, xMid+(accelX/3), yMid-(accelX/6), radius/2);  // draw square to the right
+    }
+
+    // ====================
+    // Draws Spikes
+    // ====================
+    protected void drawSpikes(Canvas canvas, int xMid, int yMid, int radius){
+        if (radius <= 1) { return; }
+//        paintAlpha = radius/2;
+        Path path = new Path();
+        path.setFillType(Path.FillType.EVEN_ODD);
+        path.lineTo(b.x + xMid, b.y + yMid);
+        path.lineTo(c.x + xMid, c.y +yMid);
+        path.lineTo(a.x +xMid, a.y +yMid + radius/3);
+        path.close();
+        canvas.drawPath(path, p);
+        drawSpikes(canvas, xMid-(radius-accelX)/3, (yMid+accelX)/3, radius/2);
+        drawSpikes(canvas, xMid+(radius+accelX)/3, (yMid-accelX)/3, radius/2);
     }
 
 }

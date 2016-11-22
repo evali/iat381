@@ -9,14 +9,14 @@
         <item>Spiky</item>
     </string-array>
 
-    <string-array name="graphic_array">
-        <item>Flowers</item>
-        <item>Butterflies</item>
-        <item>Cats</item>
-        <item>Apple</item>
+    <string-array name="motion_array">
+        <item>Static</item>
+        <item>Wobble</item>
+        <item>Bounce</item>
+        <item>Spin</item>
     </string-array>
 
-    <string-array name="theme_array">
+    <string-array name="graphic_array">
         <item>Dark</item>
         <item>Bright</item>
         <item>Colorful</item>
