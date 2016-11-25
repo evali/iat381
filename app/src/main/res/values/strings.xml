@@ -7,6 +7,7 @@
         <item>Square</item>
         <item>Wavy</item>
         <item>Spiky</item>
+        <item>Auto</item>
     </string-array>
 
     <string-array name="motion_array">

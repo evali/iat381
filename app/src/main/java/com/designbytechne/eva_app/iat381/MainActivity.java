@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // =========================
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.bringToFront();
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -171,9 +172,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //                    Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Square");
                 }
+                else if(selectPattern.equals("Wavy")){
+//                    Toast.makeText(parent.getContext(), "Wavy True", Toast.LENGTH_SHORT).show();
+//                    myView.setPatternString("Spiky");
+                }
                 else if(selectPattern.equals("Spiky")){
 //                    Toast.makeText(parent.getContext(), "Spiky True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Spiky");
+                }
+                else if(selectPattern.equals("Auto")){
+//                    Toast.makeText(parent.getContext(), "Auto True", Toast.LENGTH_SHORT).show();
+                    myView.setPatternString("Auto");
                 }
                 else{
 //                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
@@ -321,13 +330,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
+
         screenWidth = size.x;
         screenHeight = size.y;
-
         xMid = screenWidth/2;
         yMid = screenHeight/2;
+
         myView.setXMid(this.xMid);
         myView.setYMid(this.yMid);
+        myView.setScreenWidth(this.screenWidth);
+        myView.setScreenHeight(this.screenHeight);
 
         radius = 100;
         myView.setRadius(radius);
@@ -387,7 +399,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             mp.start();
         }
     }
-
 
     // =================================================================================
     // Audio Methods
