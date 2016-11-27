@@ -55,6 +55,7 @@ import android.widget.VideoView;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Random;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
@@ -107,7 +108,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private GestureDetectorCompat gestureDetect;
     private TextView accelXTextView, levelTextView;
-    public static String selectPattern, selectMotion;
+    public static String selectPattern, selectMotion, selectGraphic;
+
+    private int r1; // random number
 
     private static final String TAG = "MyActivity";
 
@@ -127,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         myView = new CustomDrawableView(this);
         myView.setPatternString("Nothing");
         myView.setMotionString("Nothing");
+        myView.setBGString("Nothing");
         myView.draw(canvas);
         myView.invalidate();
 
@@ -230,10 +234,36 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // graphicSpinner
         // ==================
         graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
-        graphicSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+        graphicSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectGraphic = parent.getItemAtPosition(position).toString();
+
+                if(selectGraphic.equals("Dark")){
+//                  Toast.makeText(parent.getContext(), "Static True", Toast.LENGTH_SHORT).show();
+                    myView.setBGString("Dark");
+                }
+                else if(selectGraphic.equals("Bright")){
+//                  Toast.makeText(parent.getContext(), "Wobble True", Toast.LENGTH_SHORT).show();
+                    myView.setBGString("Bright");
+                }
+                else if(selectGraphic.equals("Colorful")){
+                    myView.setBGString("Colorful");
+                }
+                else{
+//                  Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
+                    myView.setBGString("Nothing");
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
         ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_dropdown_item);
         graphicSpinner.setAdapter(adapter3);
+
+
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
+
 
         // =========
         // Video
@@ -344,8 +374,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         radius = 100;
         myView.setRadius(radius);
 
-        myView.setPatternString("Nothing");
-        myView.setMotionString("Nothing");
+//        myView.setPatternString("Circular");
+//        myView.setMotionString("Static");
+//        myView.setBGString("Dark");
 
         // Get a reference to a SensorManager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);

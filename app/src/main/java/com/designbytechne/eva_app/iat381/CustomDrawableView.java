@@ -19,6 +19,7 @@ import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -26,6 +27,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+import android.os.Handler;
 
 public class CustomDrawableView extends View{
 
@@ -35,6 +41,7 @@ public class CustomDrawableView extends View{
     private static int xMid, yMid, xPos, yPos, dx, dy, getXMid, getYMid, xMove, yMove, bounceX, bounceY;
     private static int screenWidth, screenHeight;
     private static int radius;
+    private static int colorR, colorB;
 
     private static int level;
     private static int stroke;
@@ -45,10 +52,19 @@ public class CustomDrawableView extends View{
     private static String patternString;
     private static String motion;
     private static String motionString;
+    private static String BGString;
 
     private Paint p;
     private int paintAlpha = 255;
     private Point a, b, c;
+
+    // Random Numbers
+    private String LOG;
+    private int r1;
+    private int delay = 3000;
+    private Handler h = new Handler();
+    Timer timer = new Timer();
+    int interval = 3000; // One second
 
     static ShapeDrawable mDrawable = new ShapeDrawable();
 
@@ -58,8 +74,6 @@ public class CustomDrawableView extends View{
 
     public CustomDrawableView(Context context) {
         super(context);
-//        LayoutInflater  mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//        mInflater.inflate(R.layout.activity_main, this, true);
 
         mDrawable = new ShapeDrawable(new OvalShape());
         mDrawable.getPaint().setColor(0xff74AC23);
@@ -70,6 +84,9 @@ public class CustomDrawableView extends View{
         xMove = 355;
         dx = 1;
         dy = 10;
+
+//        colorR = 100;
+//        colorB = 255;
     }
 
     // ==================================================================================
@@ -114,6 +131,7 @@ public class CustomDrawableView extends View{
 
     public void setPatternString(String s){this.patternString = s;}
     public void setMotionString(String s){this.motionString = s;}
+    public void setBGString(String s){this.BGString = s;}
 
 
     // ==================================================================================
@@ -160,19 +178,21 @@ public class CustomDrawableView extends View{
 
     public String getPatternString() {return this.patternString; }
     public String getMotionString() {return this.motionString; }
+    public String getBGString() {return this.BGString; }
 
 
     // ==================================================================================
     // onDraw
     // ==================================================================================
 
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(final Canvas canvas) {
         super.onDraw(canvas);
 
         // Setting paint colour
         p = new Paint();
         p.setStyle(Paint.Style.STROKE);
-        p.setColor(Color.rgb(getXPos(), getLevel() * 2, 255));
+//        p.setColor(Color.rgb(getXPos(), getLevel() * 2, 255));
+        p.setColor(Color.rgb(colorR, getLevel() * 2, colorB));
         p.setAlpha(paintAlpha);
         p.setStrokeWidth(getStroke()/3);
 
@@ -182,9 +202,9 @@ public class CustomDrawableView extends View{
         int getLevel = getLevel();
 
         // Drawing triangle
-        a = new Point(0, 0);
-        b = new Point(0, 100);
-        c = new Point(87, 50);
+        a = new Point(100 + getXMid - getXMid/4, 200 + getYMid/2 - getYMid/5);
+        b = new Point(200 + getXMid - getXMid/4, 400 + getYMid/2 - getYMid/5);
+        c = new Point(0 + getXMid - getXMid/4, 400 + getYMid/2 - getYMid/5);
 
         // ========================
         // Selecting Movement
@@ -223,13 +243,67 @@ public class CustomDrawableView extends View{
             drawSquares(canvas, xMove, getYMid + (getAccelX()/3), getRadius()/2 + getLevel()/2);
         }
         else if(getPatternString().equals("Spiky")){
-            drawSpikes(canvas, xMove, getYMid + (getAccelX()/3), getRadius() + getLevel()/2);
+            drawSpikes(canvas, xMove , getYMid/2 + (getAccelX()/3), getRadius() + getLevel()/2);
         }
         else if(getPatternString().equals("Auto")){
 
+            // Creates new random number every 1000 milliseconds
+            h.postDelayed(new Runnable(){
+                @Override
+                public void run(){
+                    Random r = new Random();
+                    r1 = r.nextInt(3 - 0 + 1) + 0;
+                    Log.d(LOG, "r1: " + r1);
+
+                    invalidate();
+//                    h.postDelayed(this, delay);
+                }
+            }, delay);
+
+            if(r1 == 0){
+                drawCloud(canvas, xMove, getYMid + (getAccelX()/3), getRadius() + getLevel()/8);
+                Toast.makeText(getContext(), "Circles #: " + r1, Toast.LENGTH_SHORT).show();
+            }
+            if(r1 == 1){
+                drawSquares(canvas, xMove, getYMid + (getAccelX()/3), getRadius()/2 + getLevel()/2);
+                Toast.makeText(getContext(), "Squares #: " + r1, Toast.LENGTH_SHORT).show();
+            }
+            if(r1 == 2){
+                Toast.makeText(getContext(), "Wavy #: " + r1, Toast.LENGTH_SHORT).show();
+            }
+            if(r1 == 3){
+                drawSpikes(canvas, xMove, getYMid + (getAccelX()/3), getRadius() + getLevel()/2);
+                Toast.makeText(getContext(), "Spiky #: " + r1, Toast.LENGTH_SHORT).show();
+            }
         }
         else{
 //            Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
+        }
+
+        // ========================
+        // Selecting Pattern
+        // ========================
+
+        if(getBGString().equals("Dark")) {
+            this.setBackgroundColor(Color.rgb(0,0,0));
+//            Toast.makeText(getContext(), "Dark Selected", Toast.LENGTH_SHORT).show();
+            colorR = 100;
+            colorB = 255;
+        }
+        else if(getBGString().equals("Bright")) {
+            this.setBackgroundColor(Color.rgb(255,208,115));
+//            Toast.makeText(getContext(), "Bright Selected", Toast.LENGTH_SHORT).show();
+            colorR = 140;
+            colorB = 199;
+        }
+        else if(getBGString().equals("Colorful")) {
+            this.setBackgroundColor(Color.rgb(56,60,232));
+//            Toast.makeText(getContext(), "Colorful Selected", Toast.LENGTH_SHORT).show();
+            colorR = 209;
+            colorB = 177;
+        }
+        else{
+//            Toast.makeText(getContext(), "No Color Selected", Toast.LENGTH_SHORT).show();
         }
 
         invalidate();
@@ -248,13 +322,6 @@ public class CustomDrawableView extends View{
         drawCloud(canvas, xMid+getLevel()*2, yMid-getLevel()*2 + yPos/8, radius/3);
         drawCloud(canvas, xMid-getLevel()*2 + yPos/8, yMid-getLevel()*2, radius/3);
         drawCloud(canvas, xMid+getLevel()*2 + yPos/8, yMid+getLevel()*2, radius/3);
-
-//       ========================
-
-//        drawCloud(canvas, xMid-radius-accelY, yMid+radius+accelY, radius/3);  // draw circle to the left
-//        drawCloud(canvas, xMid+radius+accelY, yMid-radius-accelY, radius/3);  // draw circle to the right
-//        drawCloud(canvas, xMid-radius-accelY, yMid-radius-accelY, radius/3);  // draw circle to the left
-//        drawCloud(canvas, xMid+radius+accelY, yMid+radius+accelY, radius/3);  // draw circle to the right
     }
 
     // ====================
@@ -264,7 +331,6 @@ public class CustomDrawableView extends View{
         if (radius <= 1) { return; }
 //        paintAlpha = radius/2;
         canvas.drawRect(xMid - radius*3, yMid - radius*3, xMid + radius*3, yMid + radius*3, p); // draw first square
-//        canvas.drawRect(xMid, yMid + radius, radius, radius + screenHeight/2, p); // draw first square
         drawSquares(canvas, xMid-(accelX/3), yMid+(accelX/6), radius/2);  // draw square to the left
         drawSquares(canvas, xMid+(accelX/3), yMid-(accelX/6), radius/2);  // draw square to the right
     }
@@ -277,13 +343,18 @@ public class CustomDrawableView extends View{
 //        paintAlpha = radius/2;
         Path path = new Path();
         path.setFillType(Path.FillType.EVEN_ODD);
-        path.lineTo(b.x + xMid, b.y + yMid);
-        path.lineTo(c.x + xMid, c.y +yMid);
-        path.lineTo(a.x +xMid, a.y +yMid + radius/3);
+
+        path.moveTo(a.x, a.y );
+        path.lineTo(a.x, a.y + getLevel() );
+        path.lineTo(b.x - xMid - getLevel(), b.y + yMid/2 + getLevel()  );
+        path.lineTo(c.x + xMid + getLevel(), c.y + yMid/2 + getLevel()  );
         path.close();
         canvas.drawPath(path, p);
-        drawSpikes(canvas, xMid-(radius-accelX)/3, (yMid+accelX)/3, radius/2);
-        drawSpikes(canvas, xMid+(radius+accelX)/3, (yMid-accelX)/3, radius/2);
-    }
 
+        drawSpikes(canvas, xMid/2, yMid/2, radius/2);
+//        drawSpikes(canvas, -xMid/2, yMid/2, radius/2);
+
+
+//        drawSpikes(canvas, xMid+(getLevel()), yMid-(getLevel()), radius/2);
+    }
 }
