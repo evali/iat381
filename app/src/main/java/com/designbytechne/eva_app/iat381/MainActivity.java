@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
                 else if(selectPattern.equals("Wavy")){
 //                    Toast.makeText(parent.getContext(), "Wavy True", Toast.LENGTH_SHORT).show();
-//                    myView.setPatternString("Spiky");
+                    myView.setPatternString("Wavy");
                 }
                 else if(selectPattern.equals("Spiky")){
 //                    Toast.makeText(parent.getContext(), "Spiky True", Toast.LENGTH_SHORT).show();
@@ -247,8 +247,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //                  Toast.makeText(parent.getContext(), "Wobble True", Toast.LENGTH_SHORT).show();
                     myView.setBGString("Bright");
                 }
-                else if(selectGraphic.equals("Colorful")){
-                    myView.setBGString("Colorful");
+                else if(selectGraphic.equals("Cool")){
+                    myView.setBGString("Cool");
+                }
+                else if(selectGraphic.equals("Poppy")){
+                    myView.setBGString("Poppy");
+                }
+                else if(selectGraphic.equals("Tangy")){
+                    myView.setBGString("Tangy");
                 }
                 else{
 //                  Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
@@ -330,8 +336,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         Thread thread = new Thread(new Runnable() {
                             public void run() { readAudioBuffer();}
                         });
-//                        createVisualizer();
-//                        mp.start();
 
                         thread.setPriority(Thread.currentThread().getThreadGroup().getMaxPriority());
                         thread.start();
@@ -405,25 +409,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Log.d("", "Video URI= " + audioUri);
             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
-            try {
-                mp.setDataSource(getApplicationContext(), audioUri);
-            } catch (IllegalArgumentException e) {
-                Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
-            } catch (SecurityException e) {
-                Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
-            } catch (IllegalStateException e) {
-                Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            try { mp.setDataSource(getApplicationContext(), audioUri);
+            } catch (IllegalArgumentException e) { Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
+            } catch (SecurityException e) { Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
+            } catch (IllegalStateException e) { Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
+            } catch (IOException e) { e.printStackTrace();}
 
-            try {
-                mp.prepare();
-            } catch (IllegalStateException e) {
-                Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
-            } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
-            }
+            try { mp.prepare();
+            } catch (IllegalStateException e) { Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();
+            } catch (IOException e) { Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();}
 //            mp = MediaPlayer.create(getApplicationContext(), audioUri);
 
             createVisualizer();
@@ -509,11 +503,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
+        int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent= new Intent(this, Setting.class);
@@ -680,49 +671,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 //        Log.d("rate", String.valueOf(Visualizer.getMaxCaptureRate()));
     }
-
-
-
-
-    // =================================================================================
-    // Spinner button listener
-    // =================================================================================
-
-//    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-//        // An item was selected. You can retrieve the selected item using
-//
-//        String graphicString = parent.getItemAtPosition(pos).toString();
-//
-//        if(graphicString == "Circular"){
-//            Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-//
-//    @Override
-//    public void onNothingSelected(AdapterView<?> parent) {
-//
-//    }
-//
-//    // get the selected dropdown list value
-//    public void addListenerOnButton() {
-//
-//        patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
-//        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
-//        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
-//        // btnSubmit = (Button) findViewById(R.id.btnSubmit);
-//
-//        patternSpinner.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View v) {
-//
-//                if( String.valueOf(patternSpinner.getSelectedItem()) == "Spiky"){
-//                    // Toast.makeText(getApplication(), "Spiky Select", Toast.LENGTH_LONG).show();
-//                }
-//            }
-//
-//        });
-//    }
 
 
 }

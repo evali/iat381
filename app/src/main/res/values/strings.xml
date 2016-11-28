@@ -20,7 +20,10 @@
     <string-array name="graphic_array">
         <item>Dark</item>
         <item>Bright</item>
-        <item>Colorful</item>
+        <item>Cool</item>
+        <item>Poppy</item>
+        <item>Tangy</item>
+
     </string-array>
 
 </resources>
