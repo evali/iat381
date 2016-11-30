@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">iat381</string>
     <string name="action_settings">Setting</string>
+    <string name="label_permissions">Please enable Microphone and Storage permissions.</string>
 
     <string-array name="pattern_array">
         <item>Circular</item>
@@ -10,14 +11,14 @@
         <item>Auto</item>
     </string-array>
 
-    <string-array name="motion_array">
+    <string-array name="graphic_array">
         <item>Static</item>
         <item>Wobble</item>
         <item>Bounce</item>
         <item>Spin</item>
     </string-array>
 
-    <string-array name="graphic_array">
+    <string-array name="theme_array">
         <item>Dark</item>
         <item>Bright</item>
         <item>Cool</item>

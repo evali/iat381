@@ -11,106 +11,122 @@
     tools:context="com.designbytechne.eva_app.iat381.MainActivity"
     tools:showIn="@layout/activity_main">
 
-
     <!-- ============== -->
     <!-- TEXT VIEWS     -->
     <!-- ============== -->
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        >
+    <!--<LinearLayout-->
+        <!--android:orientation="vertical"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingLeft="@dimen/activity_horizontal_margin"-->
+        <!--android:paddingRight="@dimen/activity_horizontal_margin">-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/accelXTextView"
-            />
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/accelXTextView"-->
+            <!--/>-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/levelTextView"
-            />
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/levelTextView"-->
+            <!--/>-->
 
-    </LinearLayout>
+    <!--</LinearLayout>-->
 
     <VideoView
         android:layout_width="wrap_content"
         android:layout_height="321dp"
         android:id="@+id/videoView01"
-        android:layout_weight="1"
         android:layout_alignParentBottom="true"
         />
 
     <!-- ============ -->
-    <!-- SPINNERS     -->
+    <!-- TABLE        -->
     <!-- ============ -->
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
         <TableLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:id="@+id/tableLayout">
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1" >
+                <!-- ================== -->
+                <!-- TOGGLE + PROGRESS  -->
+                <!-- ================== -->
 
-                <ProgressBar
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/progressbar_level" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" >
-
-                <Spinner
-                    android:id="@+id/patternSpinner"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" >
 
-                <Spinner
-                    android:id="@+id/motionSpinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
+                    <!--<ToggleButton-->
+                        <!--android:text="ToggleButton"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_weight="0.33"-->
+                        <!--android:id="@+id/toggle"/>-->
 
-                <Spinner
-                    android:id="@+id/graphicSpinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
+                    <!--<EditText-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:inputType="textPersonName"-->
+                        <!--android:text="New Theme"-->
+                        <!--android:textColor="#FFFFFF"-->
+                        <!--android:ems="10"-->
+                        <!--android:layout_weight="0.33"-->
+                        <!--android:id="@+id/editTextThemeName" />-->
+
+                    <!--<ProgressBar-->
+                        <!--style="?android:attr/progressBarStyleHorizontal"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_weight="0.33"-->
+                        <!--android:id="@+id/progressbar_level" />-->
+
+                </TableRow>
+
+                <!-- ============ -->
+                <!-- SPINNERS     -->
+                <!-- ============ -->
 
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" >
 
-                </TableRow>
+                    <Spinner
+                        android:id="@+id/patternSpinner"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.33" />
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    <Spinner
+                        android:id="@+id/graphicSpinner"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.33"/>
 
-            </TableRow>
+                    <Spinner
+                        android:id="@+id/themeSpinner"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.33"/>
+                 </TableRow>
+
+            <!-- ============ -->
+            <!-- TOGGLES      -->
+            <!-- ============ -->
 
             <TableRow
                 android:layout_width="match_parent"
@@ -149,8 +165,17 @@
         android:layout_alignParentTop="true"
         android:layout_width="fill_parent"
         android:paddingBottom="@dimen/activity_vertical_margin_bottom"
-        android:paddingTop="0dp">
+        android:paddingTop="@dimen/activity_vertical_margin_top">
 
+        <!--<EditText-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:inputType="textPersonName"-->
+            <!--android:text="New Theme"-->
+            <!--android:ems="10"-->
+            <!--android:textColor="#FFFFFF"-->
+            <!--android:layout_weight="0.33"-->
+            <!--android:id="@+id/editTextThemeName" />-->
     </LinearLayout>
 
 </RelativeLayout>

@@ -3,6 +3,7 @@ package com.designbytechne.eva_app.iat381;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -37,14 +38,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -55,16 +52,17 @@ import android.widget.VideoView;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Random;
+
+import static com.designbytechne.eva_app.iat381.CustomOnItemSelectedListener.selected;
 
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
 
     VideoView vv;
 
-    ToggleButton moveToggleButton;
-
     static final int PICK_AUDIO_REQUEST = 1;
+
+    ToggleButton moveToggleButton;
 
     public static final int sampleRate = 11025;
     public static final int bufferSizeFactor = 10;
@@ -78,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public DataOutputStream output;
 
     // Create custom DrawableView
-    public static CustomDrawableView myView;
+    CustomDrawableView myView;
     static ShapeDrawable mDrawable = new ShapeDrawable();
 
     // Position and Acceleration values for drawing the shapes
@@ -94,27 +92,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor Accelerometer;
     private SensorManager sensorManager = null;
 
-    // Media Player and Visualizer
+    // MediaPlayer and Visualizer
     private MediaPlayer mp;
-    private MediaRecorder mRecorder;
     private AudioManager am;
-    private int volLevel;
     private Visualizer audioOutput = null;
-    private float intensity = 0;
-    private int intensityInt;
     private int dbValue;
 
-    private Spinner patternSpinner, motionSpinner, graphicSpinner;
+    private Spinner patternSpinner, themeSpinner, graphicSpinner;
+    String selectedPattern, selectedTheme, selectedGraphic;
 
     private GestureDetectorCompat gestureDetect;
     private TextView accelXTextView, levelTextView;
-    public static String selectPattern, selectMotion, selectGraphic;
-
-    private int r1; // random number
 
     private static final String TAG = "MyActivity";
 
+    CustomDrawableView mCustomView;
     LinearLayout.LayoutParams params;
+
+    //SQLite
+    MyDatabase db;
+    EditText editTextThemeName;
+
+    //sharedPreference
+    String DEFAULT = "not available";
+
 
     // =================================================================================
     // onCreate Method
@@ -122,8 +123,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         setContentView(R.layout.activity_main);
 
         Canvas canvas = new Canvas();
@@ -134,127 +133,142 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         myView.draw(canvas);
         myView.invalidate();
 
-        accelXTextView = (TextView) findViewById(R.id.accelXTextView);
-        levelTextView = (TextView) findViewById((R.id.levelTextView));
+//        accelXTextView = (TextView) findViewById(R.id.accelXTextView);
+//        levelTextView = (TextView) findViewById((R.id.levelTextView));
 
         params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT); // 2 pixels height
         ((LinearLayout) findViewById(R.id.topLinearLayout)).addView(new CustomDrawableView(this), params);
 
-        // =========================
-        // Dropdown Menu (Spinner)
-        // =========================
+        // ==============================================
+        // Saving theme
+        // ==============================================
+        editTextThemeName = (EditText)findViewById(R.id.editTextThemeName);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.bringToFront();
-        setSupportActionBar(toolbar);
+        db = new MyDatabase(this);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabSave);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Theme added", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+               addTheme();
             }
         });
 
+        // ==============================================
+        // Dropdown Menu (Spinner)
+        // ==============================================
         moveToggleButton = (ToggleButton) findViewById(R.id.moveToggleButton);
+
+//        // patternSpinner
+//        patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
+//        patternSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item); // Create an ArrayAdapter using the string array and a default spinner layout
+//        patternSpinner.setAdapter(adapter); // Apply the adapter to the spinner
+//
+//        // themeSpinner
+//        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
+//        themeSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+//        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.theme_array, android.R.layout.simple_spinner_item);
+//        themeSpinner.setAdapter(adapter2);
+//
+//        // graphicSpinner
+//        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
+//        graphicSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+//        ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_item);
+//        graphicSpinner.setAdapter(adapter3);
+//
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
+
 
         // ==================
         // Pattern Spinner
         // ==================
         patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
         patternSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectPattern = parent.getItemAtPosition(position).toString();
+                selected = parent.getItemAtPosition(position).toString();
+                saveSharedPreferences();
 
-                if(selectPattern.equals("Circular")){
+                if(selected.equals("Circular")){
 //                    Toast.makeText(parent.getContext(), "Circular True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Circular");
+                    selectedPattern = "Circular";
                 }
-                else if(selectPattern.equals("Square")){
+                else if(selected.equals("Square")){
 //                    Toast.makeText(parent.getContext(), "Square True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Square");
+                    selectedPattern = "Square";
                 }
-                else if(selectPattern.equals("Wavy")){
+                else if(selected.equals("Wavy")){
 //                    Toast.makeText(parent.getContext(), "Wavy True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Wavy");
+                    selectedPattern = "Wavy";
                 }
-                else if(selectPattern.equals("Spiky")){
+                else if(selected.equals("Spiky")){
 //                    Toast.makeText(parent.getContext(), "Spiky True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Spiky");
+                    selectedPattern = "Spiky";
                 }
-                else if(selectPattern.equals("Auto")){
+                else if(selected.equals("Auto")){
 //                    Toast.makeText(parent.getContext(), "Auto True", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Auto");
+                    selectedPattern = "Auto";
                 }
                 else{
 //                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
                     myView.setPatternString("Nothing");
+                    selectedPattern = "Nothing";
                 }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
+
+
+
         });
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item); // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_dropdown_item); // Create an ArrayAdapter using the string array and a default spinner layout
         patternSpinner.setAdapter(adapter); // Apply the adapter to the spinner
 
+
         // ==================
-        // motionSpinner
+        // themeSpinner
         // ==================
-        motionSpinner = (Spinner) findViewById(R.id.motionSpinner);
-        motionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
+        themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectMotion = parent.getItemAtPosition(position).toString();
+                selected = parent.getItemAtPosition(position).toString();
+                saveSharedPreferences();
 
-                if(selectMotion.equals("Static")){
-//                    Toast.makeText(parent.getContext(), "Static True", Toast.LENGTH_SHORT).show();
-                    myView.setMotionString("Static");
-                }
-                else if(selectMotion.equals("Wobble")){
-//                    Toast.makeText(parent.getContext(), "Wobble True", Toast.LENGTH_SHORT).show();
-                    myView.setMotionString("Wobble");
-                }
-                else if(selectMotion.equals("Bounce")){
-                    myView.setMotionString("Bounce");
-                }
-                else{
-//                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
-                    myView.setMotionString("Nothing");
-                }
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
-        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.motion_array, android.R.layout.simple_spinner_dropdown_item);
-        motionSpinner.setAdapter(adapter2);
-
-        // ==================
-        // graphicSpinner
-        // ==================
-        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
-        graphicSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectGraphic = parent.getItemAtPosition(position).toString();
-
-                if(selectGraphic.equals("Dark")){
-//                  Toast.makeText(parent.getContext(), "Static True", Toast.LENGTH_SHORT).show();
+                if(selected.equals("Dark")){
+//                    Toast.makeText(parent.getContext(), "Dark True", Toast.LENGTH_SHORT).show();
                     myView.setBGString("Dark");
+                    selectedTheme = "Dark";
                 }
-                else if(selectGraphic.equals("Bright")){
-//                  Toast.makeText(parent.getContext(), "Wobble True", Toast.LENGTH_SHORT).show();
+                else if(selected.equals("Bright")){
+//                    Toast.makeText(parent.getContext(), "Colorful True", Toast.LENGTH_SHORT).show();
                     myView.setBGString("Bright");
+                    selectedTheme = "Bright";
                 }
-                else if(selectGraphic.equals("Cool")){
+                else if(selected.equals("Cool")){
                     myView.setBGString("Cool");
+                    selectedTheme = "Cool";
                 }
-                else if(selectGraphic.equals("Poppy")){
+                else if(selected.equals("Poppy")){
                     myView.setBGString("Poppy");
+                    selectedTheme = "Poppy";
                 }
-                else if(selectGraphic.equals("Tangy")){
+                else if(selected.equals("Tangy")){
                     myView.setBGString("Tangy");
+                    selectedTheme = "Tangy";
                 }
                 else{
 //                  Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
@@ -264,16 +278,53 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.theme_array, android.R.layout.simple_spinner_dropdown_item);
+        themeSpinner.setAdapter(adapter2);
+
+
+        // ==================
+        // graphicSpinner
+        // ==================
+        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
+        graphicSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selected = parent.getItemAtPosition(position).toString();
+                saveSharedPreferences();
+
+                if(selected.equals("Static")){
+//                    Toast.makeText(parent.getContext(), "Static True", Toast.LENGTH_SHORT).show();
+                    myView.setMotionString("Static");
+                    selectedGraphic = "Static";
+                }
+                else if(selected.equals("Wobble")){
+//                    Toast.makeText(parent.getContext(), "Wobble True", Toast.LENGTH_SHORT).show();
+                    myView.setMotionString("Wobble");
+                    selectedGraphic = "Wobble";
+                }
+                else if(selected.equals("Bounce")){
+                    myView.setMotionString("Bounce");
+                    selectedGraphic = "Bounce";
+                }
+                else{
+//                    Toast.makeText(parent.getContext(), "None", Toast.LENGTH_SHORT).show();
+                    myView.setMotionString("Nothing");
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
         ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_dropdown_item);
         graphicSpinner.setAdapter(adapter3);
-
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
 
 
-        // =========
+
+        // ==============================================
         // Video
-        // =========
+        // ==============================================
 
         //loop video
         vv = (VideoView) findViewById(R.id.videoView01);
@@ -291,18 +342,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         vv.requestFocus();
 //      vv.start();
 
-
         // ==================
         // Media Player
         // ==================
         mp = new MediaPlayer();
-//        mp = MediaPlayer.create(getApplicationContext(),R.raw.hello);
         AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
 
-
-        // ==================
+        // ==============================================
         // Audio Detection
-        // ==================
+        // ==============================================
 
         level = (ProgressBar) findViewById(R.id.progressbar_level);
         level.setMax(32676);
@@ -332,55 +380,49 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         mediaIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
                         startActivityForResult(mediaIntent, PICK_AUDIO_REQUEST);
 
+                        // Start Recording and start thread
                         audio.startRecording();
                         Thread thread = new Thread(new Runnable() {
-                            public void run() { readAudioBuffer();}
+                            public void run() {readAudioBuffer();
+                            }
                         });
-
                         thread.setPriority(Thread.currentThread().getThreadGroup().getMaxPriority());
                         thread.start();
+
                         handler.removeCallbacks(update);
-                        handler.postDelayed(update, 100);
+                        handler.postDelayed(update, 25);
 
                     } else if (audio != null) {
                         audio.stop();
                         audio.release();
                         audio = null;
                         handler.removeCallbacks(update);
-                        mp.stop();
-
                     }
-                } catch (Exception e) {
+                }catch (Exception e) {
                     System.out.println("Audio Record failed");
                 }
+
             }
         });
 
-        // ===============================
+        // ==============================================
         // CustomDrawableView objects
-        // ===============================
+        // ==============================================
 
         // Get width and height of screen
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-
         screenWidth = size.x;
         screenHeight = size.y;
+
         xMid = screenWidth/2;
         yMid = screenHeight/2;
-
         myView.setXMid(this.xMid);
         myView.setYMid(this.yMid);
-        myView.setScreenWidth(this.screenWidth);
-        myView.setScreenHeight(this.screenHeight);
 
         radius = 100;
         myView.setRadius(radius);
-
-//        myView.setPatternString("Circular");
-//        myView.setMotionString("Static");
-//        myView.setBGString("Dark");
 
         // Get a reference to a SensorManager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -393,8 +435,97 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         gestureDetect = new GestureDetectorCompat(this, this);
         gestureDetect.setOnDoubleTapListener(this);
 
+        // Create new Media Player
+//        mp = MediaPlayer.create(getApplicationContext(),R.raw.shift);
+//        AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+//        volLevel= am.getStreamVolume(AudioManager.STREAM_MUSIC);
+//        mp.start();
+//        createVisualizer();
+
+
+        // ==============================================
+        // sharedPreferences - save last setting
+        // ==============================================
+
+//        selectedPattern = "circular";
+//        selectedTheme = "Dark";
+//        selectedGraphic = "null";
+
+//
+//        String pattern = sharedPrefs.getString("pattern", DEFAULT);
+//        String graphic = sharedPrefs.getString("graphic", DEFAULT);
+//        String theme = sharedPrefs.getString("theme", DEFAULT);
+
+//        if (!pattern.equals("null")|| !graphic.equals("null")|| !theme.equals("null"))
+//        {
+//            Toast.makeText(this, "Weclome back, loading saved preferences", Toast.LENGTH_LONG).show();
+//            selectedPattern = pattern;
+//            selectedGraphic = graphic;
+//            selectedTheme = theme;
+//        }
+//        else {
+//            //user data does not exist
+//            Toast.makeText(this, "No preference", Toast.LENGTH_LONG).show();
+//
+//        }
+
     } // End of onCreate()
 
+
+
+    void  saveSharedPreferences(){
+
+        //save the spinner items
+
+        SharedPreferences sharedPrefs = getSharedPreferences("MySetting", Context.MODE_PRIVATE);
+        int patternSelectedPosition = patternSpinner.getSelectedItemPosition();
+        int graphicSelectedPosition = graphicSpinner.getSelectedItemPosition();
+        int themeSelectedPosition = themeSpinner.getSelectedItemPosition();
+
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putInt("patternSpinnerSelection", patternSelectedPosition);
+        editor.putInt("graphicSpinnerSelection", graphicSelectedPosition);
+        editor.putInt("themeSpinnerSelection", themeSelectedPosition);
+
+        editor.commit();
+
+//        patternSpinner.setSelection(sharedPrefs.getInt("spinnerSelection",0));
+        // Call the callback
+//        saveSharedPreferences();
+    }
+
+
+    void sharePreferencesSpinner(){
+
+        SharedPreferences sharedPrefs = getSharedPreferences("MySetting", Context.MODE_PRIVATE);
+//        Toast.makeText(this, "get preference "+sharedPrefs.getInt("spinnerSelection",0), Toast.LENGTH_LONG).show();
+
+        patternSpinner.setSelection(sharedPrefs.getInt("patternSpinnerSelection",0));
+        graphicSpinner.setSelection(sharedPrefs.getInt("graphicSpinnerSelection",0));
+        themeSpinner.setSelection(sharedPrefs.getInt("themeSpinnerSelection",0));
+
+    }
+
+    // =================================================================================
+    // Saving theme - floating button
+    // =================================================================================
+    public void addTheme(){
+        String pattern = selectedPattern;
+        String graphic = selectedGraphic;
+        String theme = selectedTheme;
+        String themeName = editTextThemeName.getText().toString();
+
+        // insert new theme
+        long id = db.insertData(pattern, graphic, theme, themeName);
+        if (id < 0)
+        {
+            Toast.makeText(this, "fail", Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            Toast.makeText(this, "success"+pattern+" "+graphic+" "+theme+" "+themeName, Toast.LENGTH_SHORT).show();
+        }
+    }
 
     // =================================================================================
     // On Activity Result
@@ -437,15 +568,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             do {
                 bufferReadResult = audio.read(buffer, 0, bufferSize);
+
                 double sum = 0;
+
                 for (int i = 0; i < bufferReadResult; i++){
 //                    output.writeShort(buffer [i]);
-                    sum += buffer[i];
-//                   sum += buffer [i] * buffer [i];
+//                    sum += buffer [i] * buffer [i];
 
-                    if (buffer[i] > lastLevel) {lastLevel = buffer[i];}
+                    if (buffer[i] > lastLevel) {
+                        lastLevel = buffer[i];
+                    }
                 }
-                lastLevel = (int) Math.abs((sum / bufferReadResult));
 
             } while (bufferReadResult > 0 && audio.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING);
 
@@ -456,21 +589,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
 
         } catch (Exception e) { e.printStackTrace(); }
+
+        SharedPreferences sharedPrefs = getSharedPreferences("MySetting", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString("pattern", selectedPattern);
+        editor.putString("graphic", selectedGraphic);
+        editor.putString("theme", selectedTheme);
+        Toast.makeText(this, "Preferences saved "+selectedGraphic+selectedPattern+selectedTheme, Toast.LENGTH_LONG).show();
+        editor.commit();
     }
 
     public Runnable update = new Runnable() {
 
         public void run() {
             MainActivity.this.level.setProgress(lastLevel);
-//            lastLevel *= .01;
-            int updateLastlevel = (int) Math.round(lastLevel) * 2;
-//            int updateLastlevel = (int) Math.round(lastLevel);
+            lastLevel *= .04;
+            int updateLastlevel = (int) Math.round(lastLevel * .2);
 
-//            myView.setLevel(updateLastlevel);
+            myView.setLevel(updateLastlevel);
 //            levelTextView.setText("Level: " + lastLevel);
-            handler.postAtTime(this, SystemClock.uptimeMillis() + 0);
+
+            handler.postAtTime(this, SystemClock.uptimeMillis() + 30);
         }
     };
+
 
     // =================================================================================
     // Saved Instance State
@@ -483,6 +625,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //save current counter value in bundle key - value
         outState.putInt("LEVEL_VALUE", lastLevel);
+        saveSharedPreferences();
     }
 
     @Override
@@ -492,6 +635,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //retrieve current counter value from bundle based on key
         lastLevel = savedInstanceState.getInt("LEVEL_VALUE");
+        sharePreferencesSpinner();
     }
 
     @Override
@@ -503,8 +647,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent= new Intent(this, Setting.class);
@@ -514,6 +661,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (id == R.id.videos) {
 //            Intent intent= new Intent(this, Videos.class);
 //            startActivity(intent);
+
             Intent intent = new Intent(this, Noise.class);
             startActivity(intent);
         }
@@ -536,7 +684,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             myView.setAccelX(this.accelX);
             myView.setAccelY(this.accelY);
-            accelXTextView.setText("AccelX: " + accelX);
+//            accelXTextView.setText("AccelX: " + accelX);
         }
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
@@ -554,6 +702,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Register this class as a listener for the accelerometer sensor
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_GAME);
+
+        sharePreferencesSpinner();
     }
 
     @Override
@@ -575,6 +725,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         myView.setYPos(this.yPos);
 
         this.gestureDetect.onTouchEvent(e);
+//        Toast toast = Toast.makeText(getApplication(), "Touched screen", Toast.LENGTH_LONG);
+//        toast.show();
         return super.onTouchEvent(e);
     }
 
@@ -602,7 +754,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-    public void onLongPress(MotionEvent e) { }
+    public void onLongPress(MotionEvent e) {
+    }
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -623,7 +776,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public boolean onDoubleTapEvent(MotionEvent e) {
         return false;
     }
-
 
     // ==================================================================================
     // Audio Visualizer
@@ -659,7 +811,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //                myView.setLevel(dbValue);
 
                 int freq = Math.abs(bytes[0] );
-                levelTextView.setText("Freq : " + freq);
+//                levelTextView.setText("Freq : " + freq);
                 myView.setLevel(freq);
                 myView.setStroke(freq);
             }
@@ -671,6 +823,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 //        Log.d("rate", String.valueOf(Visualizer.getMaxCaptureRate()));
     }
+
+
 
 
 }

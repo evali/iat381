@@ -329,11 +329,6 @@ public class CustomDrawableView extends View{
 //        canvas.drawCircle(xMid, yMid, radius, p); // draw first circle
         canvas.drawCircle(xMid + (xPos)/12, yMid + (yPos - yPos/6)/12, radius, p); // draw first circle
 
-//        drawCloud(canvas, xMid-getLevel()*2 +(accelX/12), yMid+getLevel()*2 +(accelY/12), radius/3);  // draw circle to the left
-//        drawCloud(canvas, xMid+getLevel()*2 +(accelX/12), yMid-getLevel()*2 +(accelY/12), radius/3);
-//        drawCloud(canvas, xMid-getLevel()*2 +(accelX/12), yMid-getLevel()*2 +(accelY/12), radius/3);
-//        drawCloud(canvas, xMid+getLevel()*2 +(accelX/12), yMid+getLevel()*2 +(accelY/12), radius/3);
-
         drawCloud(canvas, xMid-getLevel()*2 +(accelX/12) + xPos/16, yMid+getLevel()*2 +(accelY/12) + yPos/16, radius/3);
         drawCloud(canvas, xMid+getLevel()*2 +(accelX/12) + xPos/16, yMid-getLevel()*2 +(accelY/12) + yPos/16, radius/3);
         drawCloud(canvas, xMid-getLevel()*2 +(accelX/12) + xPos/16, yMid-getLevel()*2 +(accelY/12) + yPos/16, radius/3);
