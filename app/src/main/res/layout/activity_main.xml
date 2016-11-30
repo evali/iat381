@@ -20,26 +20,28 @@
         <!--  ACTION BAR  -->
         <!-- ============ -->
 
-        <!--<android.support.v7.widget.Toolbar-->
-            <!--android:id="@+id/toolbar"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="?attr/actionBarSize"-->
-            <!--android:background="?attr/colorPrimary"-->
-            <!--app:popupTheme="@style/AppTheme.PopupOverlay" />-->
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
 
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin">
 
-        <ToggleButton
-            android:text="ToggleButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.33"
-            android:id="@+id/toggle"/>
+        <!--<ToggleButton-->
+            <!--android:text="ToggleButton"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="0.33"-->
+            <!--android:id="@+id/toggle"/>-->
 
         <EditText
             android:layout_width="wrap_content"
@@ -48,7 +50,6 @@
             android:text="New Theme"
             android:textColor="#FFFFFF"
             android:ems="10"
-            android:layout_weight="0.33"
             android:id="@+id/editTextThemeName" />
 
         <ProgressBar
@@ -64,9 +65,10 @@
             android:clickable="true"
             app:fabSize="mini"
             android:id="@+id/fabSave"
-            android:layout_gravity="right"
             app:backgroundTint="@android:color/black"
-            app:srcCompat="@android:drawable/ic_input_add" />
+            app:srcCompat="@android:drawable/ic_input_add"
+            android:layout_weight="0.33"
+            android:layout_gravity="right" />
 
     </LinearLayout>
 

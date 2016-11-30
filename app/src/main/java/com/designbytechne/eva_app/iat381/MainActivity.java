@@ -146,8 +146,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         db = new MyDatabase(this);
 
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabSave);
         fab.setOnClickListener(new View.OnClickListener() {
