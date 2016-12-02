@@ -11,31 +11,6 @@
     tools:context="com.designbytechne.eva_app.iat381.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <!-- ============== -->
-    <!-- TEXT VIEWS     -->
-    <!-- ============== -->
-
-    <!--<LinearLayout-->
-        <!--android:orientation="vertical"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:paddingLeft="@dimen/activity_horizontal_margin"-->
-        <!--android:paddingRight="@dimen/activity_horizontal_margin">-->
-
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:id="@+id/accelXTextView"-->
-            <!--/>-->
-
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:id="@+id/levelTextView"-->
-            <!--/>-->
-
-    <!--</LinearLayout>-->
-
     <VideoView
         android:layout_width="wrap_content"
         android:layout_height="321dp"
@@ -132,6 +107,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <!-- ============ -->
+                <!-- MUSIC TOGGLE -->
+                <!-- ============ -->
+
                 <ToggleButton
                     android:text="Sound"
                     android:layout_width="wrap_content"
@@ -141,14 +120,20 @@
                     android:textOff="Music On"
                     android:textOn="Music Off" />
 
+                <!-- ============================================= -->
+                <!-- ============================================= -->
+                <!-- RECORD TOGGLE                                 -->
+                <!-- ============================================= -->
+                <!-- ============================================= -->
+
                 <ToggleButton
-                    android:text="Move Detection"
+                    android:text="Record"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/moveToggleButton"
+                    android:id="@+id/toggle"
                     android:layout_weight="1"
-                    android:textOff="Move On"
-                    android:textOn="Move Off" />
+                    android:textOff="Record On"
+                    android:textOn="Record Off" />
             </TableRow>
 
         </TableLayout>

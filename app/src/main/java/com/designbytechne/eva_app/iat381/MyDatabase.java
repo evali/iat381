@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.view.View;
 
 /**
  * Created by Eva on 2016-11-08.
@@ -13,6 +14,8 @@ public class MyDatabase {
     private SQLiteDatabase db;
     private Context context;
     private final MyHelper helper;
+
+    private CustomDrawableView myView;
 
     public MyDatabase (Context c){
         context = c;
@@ -42,14 +45,16 @@ public class MyDatabase {
     }
 
 
-    public Cursor getSelectedData(String type)
+    public Cursor getSelectedData(Long id)
     {
 //        SQLiteDatabase db = helper.getWritableDatabase();
         db = helper.getWritableDatabase();
 
         String[] columns = {Constants.UID, Constants.PATTERN, Constants.GRAPHIC, Constants.THEME};
-        String selection = Constants.PATTERN + "='" +type+ "'";  //Constants.TYPE = 'type'
-        Cursor cursor = db.query(Constants.TABLE_NAME, columns, selection, null, null, null, null);
+        String selection = Constants.UID + "=" +id;  //Constants.TYPE = 'type'
+//        Cursor cursor = db.query(Constants.TABLE_NAME, columns, selection, null, null, null, null);
+
+        Cursor cursor =  this.db.rawQuery("select * from THEMESAVED where _id" +  "='" + id + "'" , null);
         return cursor;
 
 //        StringBuffer buffer = new StringBuffer();
@@ -59,9 +64,11 @@ public class MyDatabase {
 //            int index2 = cursor.getColumnIndex(Constants.GRAPHIC);
 //            int index3 = cursor.getColumnIndex(Constants.THEME);
 //
-//            String plantName = cursor.getString(index1);
-//            String plantType = cursor.getString(index2);
-//            buffer.append(plantName + " " + plantType + "\n");
+//            String patternName = cursor.getString(index1);
+//            String graphicName = cursor.getString(index2);
+//            String themeName = cursor.getString(index3);
+//
+//            buffer.append(patternName + " " + graphicName + "\n");
 //        }
 //        return buffer.toString();
 

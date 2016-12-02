@@ -41,7 +41,6 @@ public class Noise extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.noise);
 
-
         level = (ProgressBar) findViewById(R.id.progressbar_level);
 
         level.setMax(32676);
@@ -61,7 +60,6 @@ public class Noise extends AppCompatActivity {
 
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // TODO Auto-generated method stub
-
 
                 try {
                     if (isChecked) {

@@ -12,5 +12,5 @@ public class Constants {
     public static final String GRAPHIC = "graphic";
     public static final String THEME = "theme";
     public static final String THEMENAME = "themeName";
-    public static final int DATABASE_VERSION = 5;
+    public static final int DATABASE_VERSION = 6;
 }

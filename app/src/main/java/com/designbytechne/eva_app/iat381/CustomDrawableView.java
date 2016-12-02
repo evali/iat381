@@ -39,6 +39,7 @@ public class CustomDrawableView extends View{
     private static int accelX;
     private static int accelY;
     private static int xMid, yMid, xPos, yPos, dx, dy, getXMid, getYMid, xMove, yMove, bounceX, bounceY;
+    private static int limitX1, limitX2, limitY1, limitY2;
     private static int screenWidth, screenHeight;
     private static int radius;
     private static int colorR, colorB;
@@ -81,9 +82,17 @@ public class CustomDrawableView extends View{
 
         pattern = getPatternString();
 
-        xMove = 355;
+        limitX1 = 0;
+        limitX2 = 600;
+        limitY1 = 0;
+        limitY2 = 1000;
+
+        xMove = 350;
+        yMove = 50;
         dx = 1;
-        dy = 10;
+        dy = 1;
+
+        bounceX = 250;
 
 //        colorR = 100;
 //        colorB = 255;
@@ -215,17 +224,21 @@ public class CustomDrawableView extends View{
         }
         else if(getMotionString().equals("Wobble")){
             xMove += dx;
+            yMove += dy;
 
-            if(xMove <= 0){dx = -(dx);}
-            if(xMove >= 600){dx = -(dx);}
+            if(xMove <= 300){dx = -(dx);}
+            if(xMove >= 400){dx = -(dx);}
+
+            if(yMove <= 0){dy = -(dy);}
+            if(yMove >= 100){dy = -(dy);}
         }
         else if(getMotionString().equals("Bounce")){
             bounceX += dx;
 
             if(bounceX <= 0){dx = -(dx);}
-            if(bounceX >= 1000){dx = -(dx);}
+            if(bounceX >= 500){dx = -(dx);}
 
-            yPos = (int) Math.round(300 * Math.sin(Math.toDegrees(bounceX/4)));
+            bounceY = (int) Math.round(200 * Math.sin(Math.toDegrees(bounceX/2)));
         }
         else{
 //            Toast.makeText(getContext(), "No Motion", Toast.LENGTH_SHORT).show();
@@ -237,16 +250,16 @@ public class CustomDrawableView extends View{
         // Toast.makeText(getContext(), "Pattern " + pattern, Toast.LENGTH_SHORT).show();
 
         if(getPatternString().equals("Circular")) {
-            drawCloud(canvas, xMove, getYMid + (getAccelX()/3), getRadius() + getLevel()/8);
+            drawCloud(canvas, xMove, yMove + getYMid + (getAccelX()/3), getRadius()/4 + getLevel()/8);
         }
         else if(getPatternString().equals("Square")){
-            drawSquares(canvas, xMove, getYMid + (getAccelX()/3), getRadius()/2 + getLevel()/2);
+            drawSquares(canvas,getXMid + yMove, getYMid + (getAccelX()/3), getRadius()/2 + getLevel()/8);
         }
         else if(getPatternString().equals("Wavy")){
             drawWaves(canvas, xMove, getYMid + (getAccelX()/3), getRadius()*2 + getLevel()/8);
         }
         else if(getPatternString().equals("Spiky")){
-            drawSpikes(canvas, xMove , getYMid/2 + (getAccelX()/3), getRadius() + getLevel()/2);
+            drawSpikes(canvas, xMove , yMove + getYMid/2 + (getAccelX()/3), getRadius());
         }
         else if(getPatternString().equals("Auto")){
 
@@ -265,22 +278,22 @@ public class CustomDrawableView extends View{
 
             if(r1 == 0){
                 drawCloud(canvas, xMove, getYMid + (getAccelX()/3), getRadius() + getLevel()/8);
-                Toast.makeText(getContext(), "Circles #: " + r1, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "Circles #: " + r1, Toast.LENGTH_SHORT).show();
             }
             if(r1 == 1){
                 drawSquares(canvas, xMove, getYMid + (getAccelX()/3), getRadius()/2 + getLevel()/2);
-                Toast.makeText(getContext(), "Squares #: " + r1, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "Squares #: " + r1, Toast.LENGTH_SHORT).show();
             }
             if(r1 == 2){
-                Toast.makeText(getContext(), "Wavy #: " + r1, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "Wavy #: " + r1, Toast.LENGTH_SHORT).show();
             }
             if(r1 == 3){
                 drawSpikes(canvas, xMove, getYMid + (getAccelX()/3), getRadius() + getLevel()/2);
-                Toast.makeText(getContext(), "Spiky #: " + r1, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "Spiky #: " + r1, Toast.LENGTH_SHORT).show();
             }
         }
         else{
-            Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "No Drawing", Toast.LENGTH_SHORT).show();
         }
 
         // ========================
@@ -293,29 +306,28 @@ public class CustomDrawableView extends View{
             colorB = 255;
         }
         else if(getBGString().equals("Bright")) {
-            this.setBackgroundColor(Color.rgb(255,208,115));
+            this.setBackgroundColor(Color.rgb(255,208,80 + xMove + bounceY/8));
             colorR = 140;
             colorB = 199;
         }
         else if(getBGString().equals("Cool")) {
-            this.setBackgroundColor(Color.rgb(56,60,232));
-            colorR = 209;
-            colorB = 177;
+            this.setBackgroundColor(Color.rgb(15 + xMove + bounceY/8,60,232));
+            colorR = 209 + 30;
+            colorB = 177 + 30;
         }
         else if(getBGString().equals("Poppy")){
-            this.setBackgroundColor(Color.rgb(132, 255, 196));
+            this.setBackgroundColor(Color.rgb(100 + xMove + bounceY/8, 255, 196));
             colorR = 255;
             colorB = 112;
         }
         else if(getBGString().equals("Tangy")){
-            this.setBackgroundColor(Color.rgb(255, 142, 55));
+            this.setBackgroundColor(Color.rgb(255, 142, 35 + xMove + bounceY/8));
             colorR = 255;
-            colorB = 230;
+            colorB = 230 + 20;
         }
         else{
-            Toast.makeText(getContext(), "No Color Selected", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "No Color Selected", Toast.LENGTH_SHORT).show();
         }
-
         invalidate();
     }
 
@@ -324,26 +336,25 @@ public class CustomDrawableView extends View{
     // ====================
 
     protected void drawCloud(Canvas canvas, int xMid, int yMid, int radius){
-        if (radius <= 1) { return; }
-//        paintAlpha = radius/6;
-//        canvas.drawCircle(xMid, yMid, radius, p); // draw first circle
-        canvas.drawCircle(xMid + (xPos)/12, yMid + (yPos - yPos/6)/12, radius, p); // draw first circle
+        if (radius >= 2000) { return; }
 
-        drawCloud(canvas, xMid-getLevel()*2 +(accelX/12) + xPos/16, yMid+getLevel()*2 +(accelY/12) + yPos/16, radius/3);
-        drawCloud(canvas, xMid+getLevel()*2 +(accelX/12) + xPos/16, yMid-getLevel()*2 +(accelY/12) + yPos/16, radius/3);
-        drawCloud(canvas, xMid-getLevel()*2 +(accelX/12) + xPos/16, yMid-getLevel()*2 +(accelY/12) + yPos/16, radius/3);
-        drawCloud(canvas, xMid+getLevel()*2 +(accelX/12) + xPos/16, yMid+getLevel()*2 +(accelY/12) + yPos/16, radius/3);
+        canvas.drawCircle(xMid + (xPos)/12, yMid - (bounceY - bounceY/3)/12, radius/4, p); // draw first circle
+        drawCloud(canvas, xMid-(xPos/12), yMid + yMove + (bounceY - bounceY/6)/8, radius*2);  // draw square to the left
+
+//        drawCloud(canvas, xMid-(xPos/12), yMid+(accelY/6) + yMove + (bounceY - bounceY/6)/8, radius*2);  // draw square to the left
     }
 
     // ====================
     // Draws Squares
     // ====================
     protected void drawSquares(Canvas canvas, int xMid, int yMid, int radius){
-        if (radius <= 1) { return; }
-//        paintAlpha = radius/2;
-        canvas.drawRect(xMid - radius*3, yMid - radius*3, xMid + radius*3, yMid + radius*3, p); // draw first square
-        drawSquares(canvas, xMid-(xPos/12), yMid+(accelY/6), radius/2);  // draw square to the left
-        drawSquares(canvas, xMid+(accelY/3), yMid-(yPos/12), radius/2);  // draw square to the right
+        if (radius >= 1000) { return; }
+
+        canvas.drawRect(xMid - radius/2, yMid - radius/2 - (bounceY - bounceY/3)/12, xMid + radius/2, yMid + radius/2, p); // draw first square
+
+        drawSquares(canvas, xMid-(xPos/12), yMid+yMove + (bounceY - bounceY/6)/8, radius*2);  // draw square to the left
+
+//        drawSquares(canvas, xMid-(xPos/12), yMid+(accelY/6)+yMove + (bounceY - bounceY/6)/8, radius*2);  // draw square to the left
     }
 
     // ====================
@@ -353,30 +364,29 @@ public class CustomDrawableView extends View{
         if (radius <= 1) {
             return;
         }
-        canvas.drawLine(xMid, yMid, xMid + radius/2, yMid + radius, p);
-        drawWaves(canvas, xMid+(xPos/12), yMid-(xPos/12), radius/2);
-        drawWaves(canvas, yMid-(xPos/12), xMid+(xPos/12), radius/2);
+        canvas.drawLine(xMid, yMid + (bounceY - bounceY/6)/8, xMid + radius/2, yMid + radius + (bounceY - bounceY/6)/8, p);
 
+        drawWaves(canvas, xMid+(xPos/12), yMid-(xPos/12) - (bounceY - bounceY/3)/12, radius/2);
+        drawWaves(canvas, yMid-(xPos/12) - (bounceY - bounceY/3)/12, xMid+(xPos/12), radius/2);
     }
 
     // ====================
     // Draws Spikes
     // ====================
     protected void drawSpikes(Canvas canvas, int xMid, int yMid, int radius){
+
         if (radius <= 1) { return; }
-//        paintAlpha = radius/2;
+
         Path path = new Path();
         path.setFillType(Path.FillType.EVEN_ODD);
 
-        path.moveTo(a.x, a.y );
-        path.lineTo(a.x, a.y + getLevel() );
-        path.lineTo(b.x - xMid - getLevel(), b.y + yMid/2 + getLevel()  );
-        path.lineTo(c.x + xMid + getLevel(), c.y + yMid/2 + getLevel()  );
+        path.moveTo(a.x, a.y - yMid/16 - (bounceY - bounceY/3)/12 );
+        path.lineTo(a.x, a.y - yMid/16 - (bounceY - bounceY/3)/12 );
+        path.lineTo(b.x - xMid/8 + 0, b.y + yMid/8 + getLevel()/2 - (bounceY - bounceY/3)/12 );
+        path.lineTo(c.x + xMid/8 - 0, c.y + yMid/8 + getLevel()/2 - (bounceY - bounceY/3)/12  );
         path.close();
         canvas.drawPath(path, p);
 
-        drawSpikes(canvas, xMid/2 + xPos/16, yMid/2 + yPos/16, radius/2);
-//        drawSpikes(canvas, -xMid/2, yMid/2, radius/2);
-//        drawSpikes(canvas, xMid+(getLevel()), yMid-(getLevel()), radius/2);
+        drawSpikes(canvas, xMid*2+(xPos/12), yMid*2-(yPos/12) + (bounceY - bounceY/6)/8, radius/2);
     }
 }

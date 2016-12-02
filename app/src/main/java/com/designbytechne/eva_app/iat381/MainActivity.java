@@ -42,6 +42,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -53,7 +54,7 @@ import android.widget.VideoView;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import static com.designbytechne.eva_app.iat381.CustomOnItemSelectedListener.selected;
+//import static com.designbytechne.eva_app.iat381.CustomOnItemSelectedListener.selected;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
@@ -98,8 +99,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Visualizer audioOutput = null;
     private int dbValue;
 
+    // Bytes for Visualizer
+    int counterPlayer = 0;
+    static double[] drawingBufferForPlayer = new double[100];
+    private byte[] mBytes;
+    private byte[] mFFTBytes;
+
     private Spinner patternSpinner, themeSpinner, graphicSpinner;
-    String selectedPattern, selectedTheme, selectedGraphic;
+    String selectedPattern, selectedTheme, selectedGraphic, selected;
 
     private GestureDetectorCompat gestureDetect;
     private TextView accelXTextView, levelTextView;
@@ -149,7 +156,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabSave);
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabSave);
+        ImageButton fab = (ImageButton) findViewById(R.id.fabSave);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -159,32 +167,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                addTheme();
             }
         });
-
-        // ==============================================
-        // Dropdown Menu (Spinner)
-        // ==============================================
-        moveToggleButton = (ToggleButton) findViewById(R.id.moveToggleButton);
-
-//        // patternSpinner
-//        patternSpinner = (Spinner) findViewById(R.id.patternSpinner);
-//        patternSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
-//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pattern_array, android.R.layout.simple_spinner_item); // Create an ArrayAdapter using the string array and a default spinner layout
-//        patternSpinner.setAdapter(adapter); // Apply the adapter to the spinner
-//
-//        // themeSpinner
-//        themeSpinner = (Spinner) findViewById(R.id.themeSpinner);
-//        themeSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
-//        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.theme_array, android.R.layout.simple_spinner_item);
-//        themeSpinner.setAdapter(adapter2);
-//
-//        // graphicSpinner
-//        graphicSpinner = (Spinner) findViewById(R.id.graphicSpinner);
-//        graphicSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
-//        ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.graphic_array, android.R.layout.simple_spinner_item);
-//        graphicSpinner.setAdapter(adapter3);
-//
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
-
 
         // ==================
         // Pattern Spinner
@@ -321,26 +303,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // Specify the layout to use when the list of choices appears
 
 
-
         // ==============================================
         // Video
         // ==============================================
 
-        //loop video
-        vv = (VideoView) findViewById(R.id.videoView01);
-
-        //Video Loop
-        vv.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            public void onCompletion(MediaPlayer mp) {
-                vv.start(); //need to make transition seamless.
-            }
-        });
-
-        Uri uri = Uri.parse("http://eva-app.designbytechne.com/videoview1.mp4");
-
-        vv.setVideoURI(uri);
-        vv.requestFocus();
-//      vv.start();
+//        //loop video
+//        vv = (VideoView) findViewById(R.id.videoView01);
+//
+//        //Video Loop
+//        vv.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//            public void onCompletion(MediaPlayer mp) {
+//                vv.start(); //need to make transition seamless.
+//            }
+//        });
+//
+//        Uri uri = Uri.parse("http://eva-app.designbytechne.com/videoview1.mp4");
+//
+//        vv.setVideoURI(uri);
+//        vv.requestFocus();
+////      vv.start();
 
         // ==================
         // Media Player
@@ -352,58 +333,59 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Audio Detection
         // ==============================================
 
-        level = (ProgressBar) findViewById(R.id.progressbar_level);
-        level.setMax(32676);
+//        level = (ProgressBar) findViewById(R.id.progressbar_level);
+//        level.setMax(32676);
 
-        ToggleButton record = (ToggleButton) findViewById(R.id.musicToggleButton);
-
-        //check if the device has mic or proximity sensor
-        PackageManager manager = getPackageManager();
-        boolean hasMic = manager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE);
-        boolean hasProximitySensor = manager.hasSystemFeature(PackageManager.FEATURE_SENSOR_PROXIMITY);
-        //If not, present a message
-        if (hasProximitySensor==false && hasMic==false){
-            Toast.makeText(this,"Your device does not have a microphone or proximity sensor",Toast.LENGTH_LONG).show();
-        }
+        final ToggleButton record = (ToggleButton) findViewById(R.id.musicToggleButton);
 
         record.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 try {
-                    if (isChecked) {
-                        bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-                        audio = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+                    if (record.isChecked()) {
+//                        bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+//                        audio = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+
+//                        Toast.makeText(getApplicationContext(), "Music On", Toast.LENGTH_LONG).show();
 
                         // Begin new intent and get audio file
                         Intent mediaIntent = new Intent(Intent.ACTION_PICK);
                         mediaIntent.setType("audio/*"); //set mime type as per requirement
                         mediaIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
                         startActivityForResult(mediaIntent, PICK_AUDIO_REQUEST);
+                        mp.start();
 
                         // Start Recording and start thread
-                        audio.startRecording();
-                        Thread thread = new Thread(new Runnable() {
-                            public void run() {readAudioBuffer();
-                            }
-                        });
-                        thread.setPriority(Thread.currentThread().getThreadGroup().getMaxPriority());
-                        thread.start();
+//                        audio.startRecording();
+//                        Thread thread = new Thread(new Runnable() {
+//                            public void run() {readAudioBuffer();
+//                            }
+//                        });
+//                        thread.setPriority(Thread.currentThread().getThreadGroup().getMaxPriority());
+//                        thread.start();
 
                         handler.removeCallbacks(update);
                         handler.postDelayed(update, 25);
 
-                    } else if (audio != null) {
-                        audio.stop();
-                        audio.release();
-                        audio = null;
-                        handler.removeCallbacks(update);
+                    } else{
+                        mp.stop();
+                        Toast.makeText(getApplicationContext(), "Music Off", Toast.LENGTH_LONG).show();
                     }
+
+//                    else if (audio != null) {
+//                        audio.stop();
+//                        audio.release();
+//                        audio = null;
+//                        handler.removeCallbacks(update);
+//                    }
+
                 }catch (Exception e) {
                     System.out.println("Audio Record failed");
                 }
 
             }
         });
+
 
         // ==============================================
         // CustomDrawableView objects
@@ -439,38 +421,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //        mp = MediaPlayer.create(getApplicationContext(),R.raw.shift);
 //        AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
 //        volLevel= am.getStreamVolume(AudioManager.STREAM_MUSIC);
-//        mp.start();
-//        createVisualizer();
-
-
-        // ==============================================
-        // sharedPreferences - save last setting
-        // ==============================================
-
-//        selectedPattern = "circular";
-//        selectedTheme = "Dark";
-//        selectedGraphic = "null";
-
-//
-//        String pattern = sharedPrefs.getString("pattern", DEFAULT);
-//        String graphic = sharedPrefs.getString("graphic", DEFAULT);
-//        String theme = sharedPrefs.getString("theme", DEFAULT);
-
-//        if (!pattern.equals("null")|| !graphic.equals("null")|| !theme.equals("null"))
-//        {
-//            Toast.makeText(this, "Weclome back, loading saved preferences", Toast.LENGTH_LONG).show();
-//            selectedPattern = pattern;
-//            selectedGraphic = graphic;
-//            selectedTheme = theme;
-//        }
-//        else {
-//            //user data does not exist
-//            Toast.makeText(this, "No preference", Toast.LENGTH_LONG).show();
-//
-//        }
+        mp.start();
+        createVisualizer();
 
     } // End of onCreate()
-
 
 
     void  saveSharedPreferences(){
@@ -504,11 +458,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         graphicSpinner.setSelection(sharedPrefs.getInt("graphicSpinnerSelection",0));
         themeSpinner.setSelection(sharedPrefs.getInt("themeSpinnerSelection",0));
 
+        String myThemePattern = sharedPrefs.getString("mythemePattern",null);
+        String myThemeGraphic = sharedPrefs.getString("mythemegraphic",null);
+        String myThemeTheme = sharedPrefs.getString("mythemeTheme",null);
+        String myThemeThemename = sharedPrefs.getString("mythemeThemename",null);
+
+
+        //check position
+
+        ArrayAdapter myAdap1 = (ArrayAdapter) patternSpinner.getAdapter(); //cast to an ArrayAdapter
+        ArrayAdapter myAdap2 = (ArrayAdapter) graphicSpinner.getAdapter(); //cast to an ArrayAdapter
+        ArrayAdapter myAdap3 = (ArrayAdapter) themeSpinner.getAdapter(); //cast to an ArrayAdapter
+
+        int spinnerPosition1 = myAdap1.getPosition(myThemePattern);
+        int spinnerPosition2 = myAdap2.getPosition(myThemeGraphic);
+        int spinnerPosition3 = myAdap3.getPosition(myThemeTheme);
+//        Toast.makeText(this, "thme position " + spinnerPosition3 + " theme is "+myThemeGraphic, Toast.LENGTH_SHORT).show();
+
+
+        patternSpinner.setSelection(spinnerPosition1);
+        graphicSpinner.setSelection(spinnerPosition2);
+        themeSpinner.setSelection(spinnerPosition3);
+        editTextThemeName.setText(myThemeThemename);
     }
 
     // =================================================================================
     // Saving theme - floating button
     // =================================================================================
+
     public void addTheme(){
         String pattern = selectedPattern;
         String graphic = selectedGraphic;
@@ -551,7 +528,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             } catch (IOException e) { Toast.makeText(getApplicationContext(), "You might not set the URI correctly!", Toast.LENGTH_LONG).show();}
 //            mp = MediaPlayer.create(getApplicationContext(), audioUri);
 
-            createVisualizer();
+//            createVisualizer();
             mp.start();
         }
     }
@@ -602,11 +579,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public Runnable update = new Runnable() {
 
         public void run() {
-            MainActivity.this.level.setProgress(lastLevel);
-            lastLevel *= .04;
-            int updateLastlevel = (int) Math.round(lastLevel * .2);
-
-            myView.setLevel(updateLastlevel);
+//            MainActivity.this.level.setProgress(lastLevel);
+//            lastLevel *= .04;
+//            int updateLastlevel = (int) Math.round(lastLevel * .2);
+//
+//            myView.setLevel(updateLastlevel);
 //            levelTextView.setText("Level: " + lastLevel);
 
             handler.postAtTime(this, SystemClock.uptimeMillis() + 30);
@@ -754,8 +731,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-    public void onLongPress(MotionEvent e) {
-    }
+    public void onLongPress(MotionEvent e) { }
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -795,36 +771,77 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //                intensityInt = Math.round(intensity);
 //                levelTextView.setText("Intensity: " + intensityInt);
 //                myView.setLevel(intensityInt);
+//                updateVisualizer(bytes);
             }
 
             @Override
             public void onFftDataCapture(Visualizer visualizer, final byte[] bytes, int samplingRate) {
-                for (int i = 0; i < bytes.length / 2; i++) {
 
+                for (int i = 0; i < bytes.length / 2; i++) {
                     byte rfk = bytes[2 * i];
                     byte ifk = bytes[2 * i + 1];
                     float magnitude = (float) (Math.sqrt(rfk * rfk) + Math.sqrt(ifk * ifk));
                     dbValue = (int) (20 * Math.log10(magnitude/32767));
                 }
 
-//                levelTextView.setText("Db : " + dbValue);
-//                myView.setLevel(dbValue);
-
-                int freq = Math.abs(bytes[0] );
-//                levelTextView.setText("Freq : " + freq);
+                int freq = Math.abs(bytes[0]);
                 myView.setLevel(freq);
                 myView.setStroke(freq);
+
+//                updateVisualizerFFT(bytes);
+
             }
         };
 
-//        audioOutput.setDataCaptureListener(captureListener, Visualizer.getMaxCaptureRate(), false, true);
+//        audioOutput.setDataCaptureListener(captureListener, Visualizer.getMaxCaptureRate()/2, false, true);
         audioOutput.setDataCaptureListener(captureListener, 20000, false, true);
         audioOutput.setEnabled(true);
-
-//        Log.d("rate", String.valueOf(Visualizer.getMaxCaptureRate()));
     }
 
 
+    // ==================================================================================
+    // Update Visualizer
+    // ==================================================================================
+
+//    public void updateVisualizer(byte[] bytes){
+//        int t = calculateRMSLevel(bytes);
+////        Visualizer.MeasurementPeakRms measurementPeakRms = new Visualizer.MeasurementPeakRms();
+////        int x = audioOutput.getMeasurementPeakRms(measurementPeakRms);
+//        mBytes = bytes;
+//    }
+//
+//    public void updateVisualizerFFT(byte[] bytes) {
+//        int t = calculateRMSLevel(bytes);
+//        mFFTBytes = bytes;
+//    }
+//
+//    public int calculateRMSLevel(byte[] audioData) {
+//        //System.out.println("::::: audioData :::::"+audioData);
+//        double amplitude = 0;
+//        for (int i = 0; i < audioData.length; i++) {
+//            amplitude += Math.abs((double) (audioData[i] / 32768.0));
+//        }
+//        amplitude = amplitude / audioData.length;
+//        //Add this data to buffer for display
+//        if (counterPlayer < 100) {
+//            drawingBufferForPlayer[counterPlayer++] = amplitude;
+//        } else {
+//            for (int k = 0; k < 99; k++) {
+//                drawingBufferForPlayer[k] = drawingBufferForPlayer[k + 1];
+//            }
+//            drawingBufferForPlayer[99] = amplitude;
+//        }
+//
+////        updateBufferDataPlayer(drawingBufferForPlayer);
+////        setDataForPlayer(100,100);
+//
+//        int newAmp = (int) amplitude;
+//
+//        myView.setLevel(newAmp);
+//        myView.setStroke(newAmp);
+//
+//        return (int)amplitude;
+//    }
 
 
 }

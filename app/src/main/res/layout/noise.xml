@@ -13,7 +13,6 @@
         android:textOn="Turn off"
         android:gravity="right"/>
 
-
     <TextView
         android:text="Noise Level:"
         android:layout_width="match_parent"
